@@ -465,31 +465,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 639323870}
-  - component: {fileID: 639323869}
+  - component: {fileID: 639323871}
   m_Layer: 0
-  m_Name: BuildingGeneratorTest
+  m_Name: BuildingPlacementController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &639323869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 639323868}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8898fb5cf89c940a328f9223f14cb8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  buildingData: {fileID: 11400000, guid: 06b706a158c42af468831379c4009b99, type: 2}
-  rootBuildingData: {fileID: 11400000, guid: 7b8f4dbfbb4b5b04dae165fe985ad95d, type: 2}
-  previewAlpha: 0.5
-  invalidColor: {r: 1, g: 0, b: 0, a: 1}
-  previewSortingOrder: 100
 --- !u!4 &639323870
 Transform:
   m_ObjectHideFlags: 0
@@ -505,6 +488,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &639323871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 639323868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83a5c5c0b6bc45f459801c05c9d4f06f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buildingData: {fileID: 11400000, guid: 06b706a158c42af468831379c4009b99, type: 2}
+  rootBuildingData: {fileID: 11400000, guid: 7b8f4dbfbb4b5b04dae165fe985ad95d, type: 2}
 --- !u!1 &962651069
 GameObject:
   m_ObjectHideFlags: 0
