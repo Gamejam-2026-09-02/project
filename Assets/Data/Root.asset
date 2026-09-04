@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae712e638b47eba428170d75e1d81b8e, type: 3}
-  m_Name: BuildingData
+  m_Name: Root
   m_EditorClassIdentifier: 
-  buildingName: 
+  buildingName: Root
   description: 
   shapeType: 0
   squareSize: {x: 1, y: 1}
   circleRadius: 1
   costs:
   - type: 0
-    amount: 0
+    amount: 10

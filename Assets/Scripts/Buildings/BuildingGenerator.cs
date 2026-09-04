@@ -1,14 +1,16 @@
 using System;
 using UnityEngine;
 
-
 [Serializable]
 public class BuildingEntry
 {
     public BuildingData data;
-    public Building prefab;
-}
 
+    public Building prefab;
+
+    [Tooltip("这个建筑是否属于 Root。")]
+    public bool isRoot;
+}
 
 public class BuildingGenerator : MonoBehaviour
 {
@@ -17,10 +19,10 @@ public class BuildingGenerator : MonoBehaviour
     [SerializeField]
     private BuildingEntry[] buildings;
 
-
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null &&
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -29,20 +31,30 @@ public class BuildingGenerator : MonoBehaviour
         Instance = this;
     }
 
+    // =========================================================
+    // 生成
+    // =========================================================
 
     public Building Generate(
         BuildingData data,
         Vector2Int gridPosition)
     {
-        if (!CanGenerate(data, gridPosition))
+        if (!CanGenerate(
+                data,
+                gridPosition))
+        {
             return null;
+        }
 
-        Building prefab = FindPrefab(data);
+        BuildingEntry entry =
+            FindEntry(data);
 
-        if (prefab == null)
+        if (entry == null ||
+            entry.prefab == null)
         {
             Debug.LogError(
-                $"找不到建筑预制体：{data.Name}"
+                $"找不到建筑预制体：" +
+                $"{data.Name}"
             );
 
             return null;
@@ -51,19 +63,30 @@ public class BuildingGenerator : MonoBehaviour
         GridMapManager map =
             GridMapManager.Instance;
 
-        Building building = Instantiate(
-            prefab,
-            map.GridToWorld(gridPosition),
-            Quaternion.identity
+        Building building =
+            Instantiate(
+                entry.prefab,
+                map.GridToWorld(
+                    gridPosition
+                ),
+                Quaternion.identity
+            );
+
+        building.Initialize(
+            data,
+            entry.isRoot
         );
 
-        building.Initialize(data);
-
-        building.Build(gridPosition);
+        building.Build(
+            gridPosition
+        );
 
         return building;
     }
 
+    // =========================================================
+    // 能否生成
+    // =========================================================
 
     public bool CanGenerate(
         BuildingData data,
@@ -81,8 +104,11 @@ public class BuildingGenerator : MonoBehaviour
         Vector2Int[] cells =
             data.GetOccupiedCells();
 
-        if (cells == null || cells.Length == 0)
+        if (cells == null ||
+            cells.Length == 0)
+        {
             return false;
+        }
 
         for (int i = 0; i < cells.Length; i++)
         {
@@ -92,15 +118,12 @@ public class BuildingGenerator : MonoBehaviour
             GridNode node =
                 map.GetNode(position);
 
-            // 超出地图范围
             if (node == null)
                 return false;
 
-            // 地块不可建造
             if (!node.Walkable)
                 return false;
 
-            // 已经被占用
             if (node.IsOccupied)
                 return false;
         }
@@ -108,17 +131,56 @@ public class BuildingGenerator : MonoBehaviour
         return true;
     }
 
+    // =========================================================
+    // 获取预制体
+    // =========================================================
 
-    private Building FindPrefab(
+    public Building GetPrefab(
         BuildingData data)
     {
-        if (buildings == null)
+        BuildingEntry entry =
+            FindEntry(data);
+
+        return entry != null
+            ? entry.prefab
+            : null;
+    }
+
+    // =========================================================
+    // 获取 Entry
+    // =========================================================
+
+    public bool IsRoot(
+        BuildingData data)
+    {
+        BuildingEntry entry =
+            FindEntry(data);
+
+        return entry != null &&
+               entry.isRoot;
+    }
+
+    private BuildingEntry FindEntry(
+        BuildingData data)
+    {
+        if (data == null ||
+            buildings == null)
+        {
             return null;
+        }
 
         for (int i = 0; i < buildings.Length; i++)
         {
-            if (buildings[i].data == data)
-                return buildings[i].prefab;
+            BuildingEntry entry =
+                buildings[i];
+
+            if (entry == null)
+                continue;
+
+            if (entry.data == data)
+            {
+                return entry;
+            }
         }
 
         return null;

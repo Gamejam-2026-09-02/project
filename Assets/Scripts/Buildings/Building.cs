@@ -6,14 +6,26 @@ public class Building : MonoBehaviour, IBuilding
 
     private Vector2Int gridPosition;
 
+    private bool isRoot;
 
-    public BuildingData Data => data;
+    public BuildingData Data =>
+        data;
+
+    public bool IsRoot =>
+        isRoot;
+
+    public Vector2Int GridPosition =>
+        gridPosition;
 
     public string Name =>
-        data != null ? data.Name : string.Empty;
+        data != null
+            ? data.Name
+            : string.Empty;
 
     public string Description =>
-        data != null ? data.Description : string.Empty;
+        data != null
+            ? data.Description
+            : string.Empty;
 
     public Vector2Int[] OccupiedCells =>
         data != null
@@ -25,16 +37,15 @@ public class Building : MonoBehaviour, IBuilding
             ? data.Costs
             : null;
 
-
-    /// <summary>
-    /// 由建造系统在创建建筑后调用。
-    /// </summary>
-    public void Initialize(BuildingData data)
+    public virtual void Initialize(
+        BuildingData data,
+        bool isRoot = false)
     {
         if (data == null)
         {
             Debug.LogError(
-                $"{name} 初始化失败：BuildingData 为空。",
+                $"{name} 初始化失败：" +
+                "BuildingData 为空。",
                 this
             );
 
@@ -42,10 +53,11 @@ public class Building : MonoBehaviour, IBuilding
         }
 
         this.data = data;
+        this.isRoot = isRoot;
     }
 
-
-    public virtual void Build(Vector2Int gridPosition)
+    public virtual void Build(
+        Vector2Int gridPosition)
     {
         if (data == null)
         {
@@ -57,7 +69,8 @@ public class Building : MonoBehaviour, IBuilding
             return;
         }
 
-        this.gridPosition = gridPosition;
+        this.gridPosition =
+            gridPosition;
 
         GridMapManager map =
             GridMapManager.Instance;
@@ -70,22 +83,34 @@ public class Building : MonoBehaviour, IBuilding
 
         for (int i = 0; i < cells.Length; i++)
         {
-            map.Occupy(
-                gridPosition + cells[i]
-            );
+            Vector2Int position =
+                gridPosition + cells[i];
+
+            if (!map.Occupy(
+                    position,
+                    this))
+            {
+                Debug.LogError(
+                    $"{name} 占用格子失败：" +
+                    $"{position}",
+                    this
+                );
+            }
         }
 
         transform.position =
-            map.GridToWorld(gridPosition);
+            map.GridToWorld(
+                gridPosition
+            );
     }
-
 
     public virtual void Destroy()
     {
         GridMapManager map =
             GridMapManager.Instance;
 
-        if (map != null && data != null)
+        if (map != null &&
+            data != null)
         {
             Vector2Int[] cells =
                 data.GetOccupiedCells();
@@ -93,7 +118,8 @@ public class Building : MonoBehaviour, IBuilding
             for (int i = 0; i < cells.Length; i++)
             {
                 map.Release(
-                    gridPosition + cells[i]
+                    gridPosition + cells[i],
+                    this
                 );
             }
         }

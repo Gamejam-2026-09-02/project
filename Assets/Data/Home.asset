@@ -15,7 +15,7 @@ MonoBehaviour:
   buildingName: Home
   description: 
   shapeType: 0
-  squareSize: {x: 3, y: 3}
+  squareSize: {x: 5, y: 5}
   circleRadius: 1
   costs:
   - type: 0
