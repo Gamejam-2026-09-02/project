@@ -19,6 +19,9 @@ MonoBehaviour:
   AttackInterval: 1
   AttackRange: 5
   MaxHP: 100
+  resourceChange:
+    type: 0
+    amount: 1
   Type: 0
   shapeType: 0
   squareSize: {x: 5, y: 5}

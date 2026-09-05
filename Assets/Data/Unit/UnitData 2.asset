@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: UnitData 2
   m_EditorClassIdentifier: 
   unitName: Ant
+  prefab: {fileID: 4770601872170871717, guid: 68d87abe505c8f749bc01452f5e3d03a, type: 3}
   maxHealth: 15
   attackDamage: 5
   attackInterval: 1
