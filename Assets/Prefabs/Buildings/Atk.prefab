@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: -8688120069525011317}
   - component: {fileID: -6906522711612702682}
   - component: {fileID: -5895424896124703479}
+  - component: {fileID: 3160990745808165928}
   m_Layer: 6
-  m_Name: Root
+  m_Name: Atk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -99,7 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9441e6bdcbfd6ea41a37bfbbd1ccfcc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 7b8f4dbfbb4b5b04dae165fe985ad95d, type: 2}
+  data: {fileID: 11400000, guid: 594e22710ff71b54c959322270f69b6e, type: 2}
 --- !u!114 &-6906522711612702682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,3 +161,15 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &3160990745808165928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4985825276884644060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1233bfd4026408145bcf390f06218a49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

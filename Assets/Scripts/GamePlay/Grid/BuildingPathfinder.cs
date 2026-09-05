@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class AStarPathfinder
+public static class BuildingPathfinder
 {
     private static readonly Vector2Int[] Directions =
     {
@@ -35,6 +35,7 @@ public static class AStarPathfinder
         Vector2Int start =
             map.WorldToGrid(startWorld);
 
+
         Vector2Int end =
             map.WorldToGrid(endWorld);
 
@@ -53,35 +54,26 @@ public static class AStarPathfinder
 
 
 
-        // 删除多余节点
+        // 保留完整连续格子
         gridPath =
-            SmoothPath(
-                map,
-                gridPath
-            );
+            AddBuildingCorners(gridPath);
 
 
-        // 转世界坐标
-        List<Vector2> worldPath =
-            new();
+
+        List<Vector2> result =
+            new(gridPath.Count);
 
 
-        for (int i = 0; i < gridPath.Count; i++)
+
+        foreach (Vector2Int cell in gridPath)
         {
-            worldPath.Add(
-                map.GridToWorld(gridPath[i])
+            result.Add(
+                map.GridToWorld(cell)
             );
         }
 
 
-        // 生成圆角路径
-        worldPath =
-            CreateCurvePath(
-                worldPath
-            );
-
-
-        return worldPath;
+        return result;
     }
 
 
@@ -98,6 +90,7 @@ public static class AStarPathfinder
             map.GetNode(end);
 
 
+
         if (startNode == null ||
            endNode == null)
             return null;
@@ -110,7 +103,6 @@ public static class AStarPathfinder
 
 
         searchId++;
-
 
         if (searchId == int.MaxValue)
             searchId = 1;
@@ -140,6 +132,7 @@ public static class AStarPathfinder
                 end
             );
 
+
         startNode.Parent = null;
 
 
@@ -149,12 +142,14 @@ public static class AStarPathfinder
 
         while (open.Count > 0)
         {
-            GridNode current = open[0];
+            GridNode current =
+                open[0];
 
 
             for (int i = 1; i < open.Count; i++)
             {
-                GridNode node = open[i];
+                GridNode node =
+                    open[i];
 
 
                 if (node.FCost < current.FCost ||
@@ -164,6 +159,7 @@ public static class AStarPathfinder
                     current = node;
                 }
             }
+
 
 
             open.Remove(current);
@@ -185,6 +181,7 @@ public static class AStarPathfinder
                     current.Position + dir;
 
 
+
                 GridNode nextNode =
                     map.GetNode(next);
 
@@ -193,7 +190,9 @@ public static class AStarPathfinder
                 if (nextNode == null ||
                    !nextNode.Walkable ||
                    closed.Contains(nextNode))
+                {
                     continue;
+                }
 
 
 
@@ -205,7 +204,9 @@ public static class AStarPathfinder
                         map,
                         current.Position,
                         next))
+                    {
                         continue;
+                    }
                 }
 
 
@@ -216,7 +217,8 @@ public static class AStarPathfinder
                 );
 
 
-                int cost =
+
+                int moveCost =
                     IsDiagonal(
                         current.Position,
                         next)
@@ -225,20 +227,23 @@ public static class AStarPathfinder
 
 
 
-                int newG =
-                    current.GCost + cost;
+                int newCost =
+                    current.GCost +
+                    moveCost;
 
 
 
-                bool newNode =
+                bool isNew =
                     !open.Contains(nextNode);
 
 
 
-                if (newNode ||
-                   newG < nextNode.GCost)
+                if (isNew ||
+                   newCost < nextNode.GCost)
                 {
-                    nextNode.GCost = newG;
+                    nextNode.GCost =
+                        newCost;
+
 
                     nextNode.HCost =
                         GetDistance(
@@ -247,10 +252,11 @@ public static class AStarPathfinder
                         );
 
 
-                    nextNode.Parent = current;
+                    nextNode.Parent =
+                        current;
 
 
-                    if (newNode)
+                    if (isNew)
                         open.Add(nextNode);
                 }
             }
@@ -277,7 +283,7 @@ public static class AStarPathfinder
         Vector2Int from,
         Vector2Int to)
     {
-        GridNode a =
+        GridNode sideA =
             map.GetNode(
                 new Vector2Int(
                     to.x,
@@ -286,7 +292,7 @@ public static class AStarPathfinder
             );
 
 
-        GridNode b =
+        GridNode sideB =
             map.GetNode(
                 new Vector2Int(
                     from.x,
@@ -295,10 +301,10 @@ public static class AStarPathfinder
             );
 
 
-        return a != null &&
-               b != null &&
-               a.Walkable &&
-               b.Walkable;
+        return sideA != null &&
+               sideB != null &&
+               sideA.Walkable &&
+               sideB.Walkable;
     }
 
 
@@ -312,6 +318,7 @@ public static class AStarPathfinder
 
 
         node.SearchId = id;
+
         node.GCost = 0;
         node.HCost = 0;
         node.Parent = null;
@@ -324,10 +331,14 @@ public static class AStarPathfinder
         Vector2Int b)
     {
         int dx =
-            Mathf.Abs(a.x - b.x);
+            Mathf.Abs(
+                a.x - b.x
+            );
 
         int dy =
-            Mathf.Abs(a.y - b.y);
+            Mathf.Abs(
+                a.y - b.y
+            );
 
 
         int diagonal =
@@ -335,7 +346,8 @@ public static class AStarPathfinder
 
 
         int straight =
-            dx + dy - diagonal * 2;
+            Mathf.Abs(dx - dy);
+
 
 
         return diagonal * 14 +
@@ -347,82 +359,26 @@ public static class AStarPathfinder
     private static List<Vector2Int> BuildPath(
         GridNode end)
     {
-        List<Vector2Int> path =
-            new();
-
-
-        GridNode current = end;
-
-
-        while (current != null)
-        {
-            path.Add(
-                current.Position
-            );
-
-            current = current.Parent;
-        }
-
-
-        path.Reverse();
-
-
-        return path;
-    }
-
-
-
-    // ============================
-    // 路径简化
-    // ============================
-
-
-    private static List<Vector2Int> SmoothPath(
-        GridMapManager map,
-        List<Vector2Int> path)
-    {
-        if (path.Count <= 2)
-            return path;
-
-
         List<Vector2Int> result =
             new();
 
 
-        int index = 0;
+        GridNode current =
+            end;
 
 
-        result.Add(path[0]);
-
-
-
-        while (index < path.Count - 1)
+        while (current != null)
         {
-            int next =
-                path.Count - 1;
-
-
-            for (int i = path.Count - 1;
-                i > index;
-                i--)
-            {
-                if (HasLine(
-                    map,
-                    path[index],
-                    path[i]))
-                {
-                    next = i;
-                    break;
-                }
-            }
-
-
-            index = next;
-
             result.Add(
-                path[index]
+                current.Position
             );
+
+            current =
+                current.Parent;
         }
+
+
+        result.Reverse();
 
 
         return result;
@@ -430,153 +386,68 @@ public static class AStarPathfinder
 
 
 
-    private static bool HasLine(
-        GridMapManager map,
-        Vector2Int a,
-        Vector2Int b)
-    {
-        int x = a.x;
-        int y = a.y;
-
-
-        int dx =
-            Mathf.Abs(b.x - a.x);
-
-        int dy =
-            Mathf.Abs(b.y - a.y);
-
-
-
-        int sx =
-            a.x < b.x ? 1 : -1;
-
-        int sy =
-            a.y < b.y ? 1 : -1;
-
-
-
-        int err = dx - dy;
-
-
-
-        while (true)
-        {
-            GridNode node =
-                map.GetNode(
-                    new Vector2Int(x, y)
-                );
-
-
-            if (node == null ||
-               !node.Walkable)
-                return false;
-
-
-
-            if (x == b.x &&
-               y == b.y)
-                break;
-
-
-
-            int e2 = err * 2;
-
-
-            if (e2 > -dy)
-            {
-                err -= dy;
-                x += sx;
-            }
-
-
-            if (e2 < dx)
-            {
-                err += dx;
-                y += sy;
-            }
-        }
-
-
-        return true;
-    }
-
-
-
-    // ============================
-    // 贝塞尔圆角
-    // ============================
-
-
-    private static List<Vector2> CreateCurvePath(
-        List<Vector2> path)
+    /// <summary>
+    /// 增加建筑线路拐角
+    /// 但不删除格子
+    /// </summary>
+    private static List<Vector2Int> AddBuildingCorners(
+        List<Vector2Int> path)
     {
         if (path.Count <= 2)
             return path;
 
 
-        List<Vector2> result =
+
+        List<Vector2Int> result =
             new();
-
-
-        float cornerSize = 0.35f;
-
-
-        int segments = 5;
-
 
 
         result.Add(path[0]);
 
 
+        Vector2Int lastDir =
+            path[1] - path[0];
 
-        for (int i = 1; i < path.Count - 1; i++)
+
+        int straightCount = 0;
+
+
+
+        for (int i = 1;
+            i < path.Count - 1;
+            i++)
         {
-            Vector2 prev =
-                path[i - 1];
-
-            Vector2 current =
+            Vector2Int dir =
+                path[i + 1] -
                 path[i];
 
-            Vector2 next =
-                path[i + 1];
+
+
+            straightCount++;
 
 
 
-            Vector2 a =
-                Vector2.Lerp(
-                    current,
-                    prev,
-                    cornerSize
-                );
-
-
-            Vector2 b =
-                Vector2.Lerp(
-                    current,
-                    next,
-                    cornerSize
-                );
-
-
-
-            for (int j = 1; j <= segments; j++)
+            if (dir != lastDir)
             {
-                float t =
-                    j / (float)segments;
+                result.Add(
+                    path[i]
+                );
 
-
-                Vector2 point =
-                    QuadraticBezier(
-                        a,
-                        current,
-                        b,
-                        t
-                    );
-
-
-                result.Add(point);
+                straightCount = 0;
             }
+            else if (straightCount >= 3)
+            {
+                result.Add(
+                    path[i]
+                );
+
+                straightCount = 0;
+            }
+
+
+            lastDir = dir;
         }
+
 
 
         result.Add(
@@ -584,23 +455,84 @@ public static class AStarPathfinder
         );
 
 
-        return result;
+        return ExpandPath(result);
     }
 
 
 
-    private static Vector2 QuadraticBezier(
-        Vector2 a,
-        Vector2 b,
-        Vector2 c,
-        float t)
+    /// <summary>
+    /// 将控制点重新展开为连续格子
+    /// </summary>
+    private static List<Vector2Int> ExpandPath(
+        List<Vector2Int> points)
     {
-        float u = 1 - t;
+        List<Vector2Int> result =
+            new();
 
 
-        return
-            u * u * a +
-            2 * u * t * b +
-            t * t * c;
+
+        for (int i = 0;
+            i < points.Count - 1;
+            i++)
+        {
+            Vector2Int start =
+                points[i];
+
+            Vector2Int end =
+                points[i + 1];
+
+
+
+            int length =
+                Mathf.Max(
+                    Mathf.Abs(
+                        end.x - start.x
+                    ),
+                    Mathf.Abs(
+                        end.y - start.y
+                    )
+                );
+
+
+
+            for (int j = 0;
+                j < length;
+                j++)
+            {
+                float t =
+                    j / (float)length;
+
+
+
+                Vector2Int cell =
+                    Vector2Int.RoundToInt(
+                        Vector2.Lerp(
+                            start,
+                            end,
+                            t
+                        )
+                    );
+
+
+                if (result.Count == 0 ||
+                   result[^1] != cell)
+                {
+                    result.Add(cell);
+                }
+            }
+        }
+
+
+
+        if (result.Count == 0 ||
+           result[^1] != points[^1])
+        {
+            result.Add(
+                points[^1]
+            );
+        }
+
+
+        return result;
     }
 }

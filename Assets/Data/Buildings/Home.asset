@@ -14,6 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingName: Home
   description: 
+  AttackDamage: 10
+  AttackInterval: 1
+  AttackRange: 5
+  MaxHP: 100
+  Type: 0
   shapeType: 0
   squareSize: {x: 5, y: 5}
   circleRadius: 1

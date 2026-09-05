@@ -1,34 +1,59 @@
+using System;
 using UnityEngine;
 
 public class GridMapManager : MonoBehaviour
 {
     public static GridMapManager Instance { get; private set; }
 
+
     [Header("Grid")]
-    [SerializeField] private Vector2Int gridSize = new(100, 100);
-    [SerializeField] private float cellSize = 1f;
+    [SerializeField]
+    private Vector2Int gridSize = new(100, 100);
+
+    [SerializeField]
+    private float cellSize = 1f;
+
 
     [Header("Map")]
-    [SerializeField] private Vector2 mapCenter;
+    [SerializeField]
+    private Vector2 mapCenter;
+
+
 
     private GridNode[,] nodes;
 
+
     public Vector2Int GridSize => gridSize;
+
     public float CellSize => cellSize;
+
     public Vector2 MapCenter => mapCenter;
+
+
+
+    /// <summary>
+    /// 地图格子变化事件
+    /// </summary>
+    public event Action<Vector2Int> OnGridChanged;
+
+
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null &&
+           Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
+
         Instance = this;
 
         GenerateGrid();
     }
+
+
 
     private void GenerateGrid()
     {
@@ -37,6 +62,7 @@ public class GridMapManager : MonoBehaviour
                 gridSize.x,
                 gridSize.y
             ];
+
 
         for (int x = 0; x < gridSize.x; x++)
         {
@@ -51,13 +77,17 @@ public class GridMapManager : MonoBehaviour
         }
     }
 
+
+
     public GridNode GetNode(Vector2Int position)
     {
         if (nodes == null)
             return null;
 
+
         if (!IsValidPosition(position))
             return null;
+
 
         return nodes[
             position.x,
@@ -65,8 +95,9 @@ public class GridMapManager : MonoBehaviour
         ];
     }
 
-    public bool IsValidPosition(
-        Vector2Int position)
+
+
+    public bool IsValidPosition(Vector2Int position)
     {
         return position.x >= 0 &&
                position.y >= 0 &&
@@ -74,8 +105,9 @@ public class GridMapManager : MonoBehaviour
                position.y < gridSize.y;
     }
 
-    public Vector2Int WorldToGrid(
-        Vector2 worldPosition)
+
+
+    public Vector2Int WorldToGrid(Vector2 worldPosition)
     {
         Vector2 bottomLeft =
             mapCenter -
@@ -84,22 +116,21 @@ public class GridMapManager : MonoBehaviour
                 gridSize.y * cellSize
             ) * 0.5f;
 
-        Vector2 localPosition =
+
+        Vector2 local =
             worldPosition -
             bottomLeft;
 
+
         return new Vector2Int(
-            Mathf.FloorToInt(
-                localPosition.x / cellSize
-            ),
-            Mathf.FloorToInt(
-                localPosition.y / cellSize
-            )
+            Mathf.FloorToInt(local.x / cellSize),
+            Mathf.FloorToInt(local.y / cellSize)
         );
     }
 
-    public Vector2 GridToWorld(
-        Vector2Int gridPosition)
+
+
+    public Vector2 GridToWorld(Vector2Int gridPosition)
     {
         Vector2 bottomLeft =
             mapCenter -
@@ -108,15 +139,28 @@ public class GridMapManager : MonoBehaviour
                 gridSize.y * cellSize
             ) * 0.5f;
 
+
         return bottomLeft +
                new Vector2(
-                   (gridPosition.x + 0.5f) *
-                   cellSize,
-
-                   (gridPosition.y + 0.5f) *
-                   cellSize
+                   (gridPosition.x + 0.5f) * cellSize,
+                   (gridPosition.y + 0.5f) * cellSize
                );
     }
+
+
+
+    public bool IsWalkable(Vector2Int position)
+    {
+        GridNode node =
+            GetNode(position);
+
+
+        return node != null &&
+               node.Walkable &&
+               !node.IsOccupied;
+    }
+
+
 
     public void SetWalkable(
         Vector2Int position,
@@ -125,43 +169,18 @@ public class GridMapManager : MonoBehaviour
         GridNode node =
             GetNode(position);
 
-        if (node != null)
-        {
-            node.Walkable =
-                walkable;
-        }
+
+        if (node == null)
+            return;
+
+
+        node.Walkable = walkable;
+
+
+        NotifyChanged(position);
     }
 
-    public void SetAreaWalkable(
-        Vector2 center,
-        Vector2 size,
-        bool walkable)
-    {
-        Vector2Int min =
-            WorldToGrid(
-                center - size * 0.5f
-            );
 
-        Vector2Int max =
-            WorldToGrid(
-                center + size * 0.5f
-            );
-
-        for (int x = min.x; x <= max.x; x++)
-        {
-            for (int y = min.y; y <= max.y; y++)
-            {
-                SetWalkable(
-                    new Vector2Int(x, y),
-                    walkable
-                );
-            }
-        }
-    }
-
-    // =========================================================
-    // Building 占用
-    // =========================================================
 
     public bool Occupy(
         Vector2Int position,
@@ -170,87 +189,82 @@ public class GridMapManager : MonoBehaviour
         GridNode node =
             GetNode(position);
 
+
         if (node == null)
             return false;
 
+
         if (node.IsOccupied &&
-            node.Occupant != building)
+           node.Occupant != building)
         {
             return false;
         }
 
+
         node.SetOccupant(building);
+
+        // 建筑占用格子不可通行
+        node.Walkable = false;
+
+
+        NotifyChanged(position);
+
 
         return true;
     }
 
     public void Release(
-        Vector2Int position,
-        Building building)
+     Vector2Int position,
+     Building building)
     {
         GridNode node =
             GetNode(position);
+
 
         if (node == null)
             return;
 
+
         node.ClearOccupant(building);
+
+        node.Walkable = true;
+
+
+        NotifyChanged(position);
     }
 
-    public bool IsOccupied(
-        Vector2Int position)
+
+    private void NotifyChanged(Vector2Int position)
+    {
+        OnGridChanged?.Invoke(position);
+    }
+
+
+
+    public bool IsOccupied(Vector2Int position)
     {
         GridNode node =
             GetNode(position);
+
 
         return node != null &&
                node.IsOccupied;
     }
 
-    public Building GetOccupant(
-        Vector2Int position)
+
+
+    public Building GetOccupant(Vector2Int position)
     {
         GridNode node =
             GetNode(position);
+
 
         return node != null
             ? node.Occupant
             : null;
     }
 
-    public bool IsAreaOccupied(
-        Vector2 center,
-        Vector2 size)
-    {
-        Vector2Int min =
-            WorldToGrid(
-                center - size * 0.5f
-            );
 
-        Vector2Int max =
-            WorldToGrid(
-                center + size * 0.5f
-            );
-
-        for (int x = min.x; x <= max.x; x++)
-        {
-            for (int y = min.y; y <= max.y; y++)
-            {
-                GridNode node =
-                    GetNode(
-                        new Vector2Int(x, y)
-                    );
-
-                if (node != null &&
-                    node.IsOccupied)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
 
     public Vector2 GetMapSize()
     {
@@ -260,14 +274,13 @@ public class GridMapManager : MonoBehaviour
         );
     }
 
+
+
     private void OnDrawGizmosSelected()
     {
-        Vector2 mapSize =
-            GetMapSize();
-
         Gizmos.DrawWireCube(
             mapCenter,
-            mapSize
+            GetMapSize()
         );
     }
 }

@@ -13,6 +13,17 @@ public class BuildingData : ScriptableObject
     [TextArea]
     [SerializeField] private string description;
 
+    [Header("防御攻击")]
+    public int AttackDamage = 10;
+
+    public float AttackInterval = 1f;
+
+    public float AttackRange = 5f;
+
+    public int MaxHP;
+
+    [Header("类型")]
+    public BuildingType Type;
 
     [Header("占地")]
     [SerializeField]
@@ -155,4 +166,12 @@ public enum ResourceType
     Gold,
     Wood,
     Stone
+}
+
+public enum BuildingType
+{
+    Home,
+    Resource,
+    Root,
+    Defense
 }

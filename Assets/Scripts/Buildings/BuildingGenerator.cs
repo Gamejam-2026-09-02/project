@@ -73,7 +73,6 @@ public class BuildingGenerator : MonoBehaviour
             );
 
         building.Initialize(
-            data,
             entry.isRoot
         );
 

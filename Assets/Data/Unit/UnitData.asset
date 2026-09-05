@@ -9,14 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae712e638b47eba428170d75e1d81b8e, type: 3}
-  m_Name: Root
+  m_Script: {fileID: 11500000, guid: 2596799497f2a9142aa8055effefbcd0, type: 3}
+  m_Name: UnitData
   m_EditorClassIdentifier: 
-  buildingName: Root
-  description: 
-  shapeType: 0
-  squareSize: {x: 1, y: 1}
-  circleRadius: 1
-  costs:
-  - type: 0
-    amount: 10
+  unitName: Ant
+  maxHealth: 15
+  attackDamage: 5
+  attackInterval: 1
+  attackRange: 1.5
+  moveSpeed: 2
+  targetBuildingType: 3

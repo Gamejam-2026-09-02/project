@@ -113,7 +113,7 @@ public class BuildingPlacementPath
 
 
                 List<Vector2> path =
-                    AStarPathfinder.FindPath(
+                    BuildingPathfinder.FindPath(
                         map.GridToWorld(startEdge),
                         map.GridToWorld(targetEdge)
                     );
