@@ -8,15 +8,6 @@ public class UnitMover : MonoBehaviour
     public UnitData data;
 
 
-    [Header("单位避让")]
-    [SerializeField]
-    private float separationRadius = 0.8f;
-
-
-    [SerializeField]
-    private float separationStrength = 2f;
-
-
     [Header("转向")]
     [SerializeField]
     private float rotationSpeed = 720f;
@@ -24,6 +15,15 @@ public class UnitMover : MonoBehaviour
 
     [SerializeField]
     private float arriveDistance = 0.05f;
+
+
+    [Header("Home危险范围")]
+    [SerializeField]
+    private float homeDangerRange = 8f;
+
+
+    [SerializeField]
+    private float homeCheckInterval = 0.2f;
 
 
 
@@ -35,6 +35,13 @@ public class UnitMover : MonoBehaviour
 
 
     private Building targetBuilding;
+
+    private Building homeBuilding;
+
+
+    private float homeCheckTimer;
+
+
 
     public void Initialize(UnitData unitData)
     {
@@ -65,13 +72,15 @@ public class UnitMover : MonoBehaviour
 
     private void Start()
     {
+        CacheHome();
+
         FindTargetBuilding();
     }
 
 
 
     // =========================================================
-    // 建筑目标
+    // 目标选择
     // =========================================================
 
 
@@ -81,36 +90,48 @@ public class UnitMover : MonoBehaviour
             return;
 
 
-        Building newTarget =
-            BuildingManager.Instance.FindNearest(
-                transform.position,
-                data.targetBuildingType
-            );
+        Building newTarget;
 
 
-        // 找不到目标，寻找 Home
-        if (newTarget == null)
+
+        if (IsHomeInDangerRange())
+        {
+            newTarget = homeBuilding;
+        }
+        else
         {
             newTarget =
                 BuildingManager.Instance.FindNearest(
                     transform.position,
-                    BuildingType.Home
+                    data.targetBuildingType
                 );
+
+
+            if (newTarget == null)
+            {
+                newTarget =
+                    BuildingManager.Instance.FindNearest(
+                        transform.position,
+                        BuildingType.Home
+                    );
+            }
         }
+
 
 
         if (newTarget == null)
             return;
 
 
-        if (newTarget == targetBuilding)
-            return;
-
 
         targetBuilding = newTarget;
 
+
         MoveToBuilding();
     }
+
+
+
 
 
     private void FindTargetBuilding()
@@ -118,37 +139,120 @@ public class UnitMover : MonoBehaviour
         if (data == null)
             return;
 
+
         if (BuildingManager.Instance == null)
             return;
 
 
-        Building target =
-            BuildingManager.Instance.FindNearest(
-                transform.position,
-                data.targetBuildingType
-            );
+
+        Building target;
 
 
-        // 没有目标建筑，尝试寻找 Home
-        if (target == null &&
-            data.targetBuildingType != BuildingType.Home)
+
+        if (IsHomeInDangerRange())
+        {
+            target = homeBuilding;
+        }
+        else
         {
             target =
                 BuildingManager.Instance.FindNearest(
                     transform.position,
-                    BuildingType.Home
+                    data.targetBuildingType
                 );
+
+
+            if (target == null &&
+                data.targetBuildingType != BuildingType.Home)
+            {
+                target =
+                    BuildingManager.Instance.FindNearest(
+                        transform.position,
+                        BuildingType.Home
+                    );
+            }
         }
+
 
 
         if (target == null)
             return;
 
 
+
         targetBuilding = target;
+
 
         MoveToBuilding();
     }
+
+
+
+    private void CacheHome()
+    {
+        if (homeBuilding != null)
+            return;
+
+
+        if (BuildingManager.Instance == null)
+            return;
+
+
+        homeBuilding =
+            BuildingManager.Instance.FindNearest(
+                transform.position,
+                BuildingType.Home
+            );
+    }
+
+
+
+    private bool IsHomeInDangerRange()
+    {
+        if (homeBuilding == null)
+            return false;
+
+
+        float distance =
+            Vector2.Distance(
+                transform.position,
+                homeBuilding.transform.position
+            );
+
+
+        return distance <= homeDangerRange;
+    }
+
+
+
+    private void CheckHomeDanger()
+    {
+        if (homeBuilding == null)
+            return;
+
+
+        homeCheckTimer -= Time.deltaTime;
+
+
+        if (homeCheckTimer > 0)
+            return;
+
+
+        homeCheckTimer = homeCheckInterval;
+
+
+
+        if (IsHomeInDangerRange())
+        {
+            if (targetBuilding != homeBuilding)
+            {
+                targetBuilding = homeBuilding;
+
+                MoveToBuilding();
+            }
+        }
+    }
+
 
 
 
@@ -180,6 +284,9 @@ public class UnitMover : MonoBehaviour
     }
 
 
+
+
+
     private bool InAttackRange()
     {
         if (targetBuilding == null ||
@@ -196,6 +303,8 @@ public class UnitMover : MonoBehaviour
 
         return distance <= data.attackRange;
     }
+
+
 
 
 
@@ -232,6 +341,7 @@ public class UnitMover : MonoBehaviour
 
 
 
+
     public void OnMapChanged(Vector2Int changedCell)
     {
         if (!moving ||
@@ -259,14 +369,21 @@ public class UnitMover : MonoBehaviour
 
 
 
+
+
     private void Update()
     {
+        CheckHomeDanger();
+
+
         if (!moving)
             return;
 
 
         MoveAlongPath();
     }
+
+
 
 
 
@@ -319,36 +436,12 @@ public class UnitMover : MonoBehaviour
 
 
 
-        moveDirection +=
-            CalculateSeparation()
-            *
-            separationStrength;
-
-
-
-        if (moveDirection.sqrMagnitude > 1)
-        {
-            moveDirection.Normalize();
-        }
-
-
-
         Vector2 movement =
             moveDirection *
-            data.moveSpeed *
-            Time.deltaTime;
-
-
-
-        float distance =
-            direction.magnitude;
-
-
-
-        if (movement.magnitude > distance)
-        {
-            movement = direction;
-        }
+            Mathf.Min(
+                data.moveSpeed * Time.deltaTime,
+                direction.magnitude
+            );
 
 
 
@@ -364,6 +457,8 @@ public class UnitMover : MonoBehaviour
 
 
 
+
+
     private void AdvancePathNode()
     {
         Vector2 position =
@@ -373,11 +468,9 @@ public class UnitMover : MonoBehaviour
 
         while (pathIndex < path.Count)
         {
-            if ((path[pathIndex] -
-                 position)
+            if ((path[pathIndex] - position)
                 .sqrMagnitude >
-                arriveDistance *
-                arriveDistance)
+                arriveDistance * arriveDistance)
             {
                 break;
             }
@@ -395,85 +488,6 @@ public class UnitMover : MonoBehaviour
     }
 
 
-
-    // =========================================================
-    // 避让
-    // =========================================================
-
-
-    private Vector2 CalculateSeparation()
-    {
-        if (RTSUnitManager.Instance == null)
-            return Vector2.zero;
-
-
-
-        List<UnitMover> units =
-            RTSUnitManager.Instance.GetUnits();
-
-
-
-        Vector2 force =
-            Vector2.zero;
-
-
-
-        float radiusSqr =
-            separationRadius *
-            separationRadius;
-
-
-
-        for (int i = 0; i < units.Count; i++)
-        {
-            UnitMover other =
-                units[i];
-
-
-            if (other == this)
-                continue;
-
-
-
-            Vector2 offset =
-                (Vector2)transform.position -
-                (Vector2)other.transform.position;
-
-
-
-            float distanceSqr =
-                offset.sqrMagnitude;
-
-
-
-            if (distanceSqr <= 0.0001f ||
-                distanceSqr > radiusSqr)
-                continue;
-
-
-
-            float distance =
-                Mathf.Sqrt(distanceSqr);
-
-
-
-            float strength =
-                1f -
-                distance /
-                separationRadius;
-
-
-
-            force +=
-                offset /
-                distance *
-                strength;
-        }
-
-
-
-        return force;
-    }
 
 
 
@@ -508,6 +522,7 @@ public class UnitMover : MonoBehaviour
             );
 
 
+
         transform.rotation =
             Quaternion.Euler(
                 0,
@@ -515,6 +530,8 @@ public class UnitMover : MonoBehaviour
                 angle
             );
     }
+
+
 
 
 
@@ -529,8 +546,10 @@ public class UnitMover : MonoBehaviour
 
 
 
+
     public bool IsMoving =>
         moving;
+
 
 
     public Building TargetBuilding =>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridMapManager : MonoBehaviour
@@ -265,7 +266,6 @@ public class GridMapManager : MonoBehaviour
     }
 
 
-
     public Vector2 GetMapSize()
     {
         return new Vector2(
@@ -273,8 +273,6 @@ public class GridMapManager : MonoBehaviour
             gridSize.y * cellSize
         );
     }
-
-
 
     private void OnDrawGizmosSelected()
     {

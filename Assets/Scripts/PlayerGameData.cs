@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerGameData
 {
     [Header("ืสิด")]
-    public int Gold;
+    public int Water;
     public int Wood;
     public int Stone;
 

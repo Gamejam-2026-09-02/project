@@ -10,17 +10,18 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
 
     private bool isRoot;
 
-
     private bool initialized;
 
 
     // 当前生命
     private int currentHealth;
 
+
     public int MaxHealth =>
-    data != null
-        ? data.MaxHP
-        : 0;
+        data != null
+            ? data.MaxHP
+            : 0;
+
 
     public BuildingData Data =>
         data;
@@ -68,11 +69,45 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
             ? data.Costs
             : null;
 
+
+
     public event Action<int> OnDamaged;
 
     public event Action OnDeath;
 
-    public virtual void Initialize(bool isRoot = false)
+    private bool connectedToHome;
+
+
+    public bool ConnectedToHome =>
+        connectedToHome;
+
+
+    public void SetConnection(bool value)
+    {
+        connectedToHome = value;
+
+
+        ApplyConnectionVisual();
+    }
+
+
+    private void ApplyConnectionVisual()
+    {
+        SpriteRenderer renderer =
+            GetComponent<SpriteRenderer>();
+
+        if (renderer == null)
+            return;
+
+
+        renderer.color =
+            connectedToHome
+            ? Color.white
+            : Color.gray;
+    }
+
+    public virtual void Initialize(
+        bool isRoot = false)
     {
         if (data == null)
         {
@@ -87,10 +122,14 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
 
         this.isRoot = isRoot;
 
-        currentHealth = data.MaxHP;
+        currentHealth =
+            data.MaxHP;
+
 
         initialized = true;
     }
+
+
 
     public virtual void Build(
         Vector2Int gridPosition)
@@ -106,7 +145,8 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
         }
 
 
-        this.gridPosition = gridPosition;
+        this.gridPosition =
+            gridPosition;
 
 
 
@@ -154,6 +194,8 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
         {
             BuildingManager.Instance.Register(this);
         }
+
+        BuildingEvents.NotifyBuilt(this);
     }
 
 
@@ -210,14 +252,12 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
 
 
 
-                // 判断是否靠近建筑
                 float distanceToBuilding =
                     GetDistanceToBuilding(pos);
 
 
 
-                if (distanceToBuilding >
-                    1.5f)
+                if (distanceToBuilding > 1.5f)
                     continue;
 
 
@@ -242,8 +282,9 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
     }
 
 
+
     private float GetDistanceToBuilding(
-    Vector2Int cell)
+        Vector2Int cell)
     {
         float min =
             float.MaxValue;
@@ -271,13 +312,15 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
         return min;
     }
 
+
+
     // ============================
     // 战斗
     // ============================
 
 
     public virtual void TakeDamage(
-      int damage)
+        int damage)
     {
         if (damage <= 0)
             return;
@@ -297,6 +340,7 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
             Destroy();
         }
     }
+
 
 
     // ============================
@@ -335,7 +379,7 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
             BuildingManager.Instance.Unregister(this);
         }
 
-
+        BuildingEvents.NotifyDestroyed(this);
 
         Destroy(gameObject);
     }

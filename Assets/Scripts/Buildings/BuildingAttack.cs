@@ -20,7 +20,8 @@ public class BuildingAttack : MonoBehaviour
     {
         if (building == null)
             return;
-
+        if (!building.ConnectedToHome)
+            return;
 
         BuildingData data = building.Data;
 

@@ -1,13 +1,19 @@
 using UnityEngine;
 
+
 public class GameInitializer : MonoBehaviour
 {
-    [SerializeField] private BuildingData mainCityData;
+    [SerializeField]
+    private BuildingData mainCityData;
+
+
 
     private void Start()
     {
         GenerateMainCity();
     }
+
+
 
     private void GenerateMainCity()
     {
@@ -17,7 +23,10 @@ public class GameInitializer : MonoBehaviour
             return;
         }
 
-        GridMapManager map = GridMapManager.Instance;
+
+        GridMapManager map =
+            GridMapManager.Instance;
+
 
         if (map == null)
         {
@@ -25,8 +34,10 @@ public class GameInitializer : MonoBehaviour
             return;
         }
 
+
         BuildingGenerator generator =
             BuildingGenerator.Instance;
+
 
         if (generator == null)
         {
@@ -34,11 +45,15 @@ public class GameInitializer : MonoBehaviour
             return;
         }
 
+
+
         Vector2Int center =
             new Vector2Int(
                 map.GridSize.x / 2,
                 map.GridSize.y / 2
             );
+
+
 
         Building mainCity =
             generator.Generate(
@@ -46,9 +61,23 @@ public class GameInitializer : MonoBehaviour
                 center
             );
 
+
         if (mainCity == null)
         {
             Debug.LogError("主城生成失败。");
+            return;
+        }
+
+
+
+        BuildingConnectionManager connection =
+            BuildingConnectionManager.Instance;
+
+
+        if (connection != null)
+        {
+            connection.SetHome(mainCity);
+            connection.Refresh();
         }
     }
 }

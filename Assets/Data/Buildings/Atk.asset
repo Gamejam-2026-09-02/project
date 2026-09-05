@@ -16,7 +16,7 @@ MonoBehaviour:
   description: 
   AttackDamage: 10
   AttackInterval: 1
-  AttackRange: 3
+  AttackRange: 4
   MaxHP: 30
   Type: 3
   shapeType: 0

@@ -5,7 +5,7 @@ public class PlayerGameDataManager : MonoBehaviour
     public static PlayerGameDataManager Instance { get; private set; }
 
     [Header("³õÊ¼Êý¾Ý")]
-    [SerializeField] private int initialGold = 100;
+    [SerializeField] private int initialWater = 100;
     [SerializeField] private int initialWood = 0;
     [SerializeField] private int initialStone = 0;
 
@@ -32,7 +32,7 @@ public class PlayerGameDataManager : MonoBehaviour
     {
         Data = new PlayerGameData
         {
-            Gold = initialGold,
+            Water = initialWater,
             Wood = initialWood,
             Stone = initialStone,
 
@@ -52,7 +52,7 @@ public class PlayerGameDataManager : MonoBehaviour
         switch (type)
         {
             case ResourceType.Gold:
-                return Data.Gold;
+                return Data.Water;
 
             case ResourceType.Wood:
                 return Data.Wood;
@@ -75,7 +75,7 @@ public class PlayerGameDataManager : MonoBehaviour
         switch (type)
         {
             case ResourceType.Gold:
-                Data.Gold += amount;
+                Data.Water += amount;
                 break;
 
             case ResourceType.Wood:

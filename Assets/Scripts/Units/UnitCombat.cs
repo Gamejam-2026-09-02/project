@@ -27,25 +27,14 @@ public class UnitCombat : MonoBehaviour
             return;
 
 
-        Building target =
-            mover.TargetBuilding;
+        Building target = mover.TargetBuilding;
 
         if (target == null)
             return;
 
-        float distance =
-      Vector2.Distance(
-          transform.position,
-          target.transform.position
-      )
-      - Mathf.Max(
-          target.transform.localScale.x,
-          target.transform.localScale.y
-      ) * 0.5f;
 
-        if (distance > data.attackRange)
+        if (!InAttackRange(target))
             return;
-
 
 
         attackTimer -= Time.deltaTime;
@@ -61,14 +50,54 @@ public class UnitCombat : MonoBehaviour
 
 
 
+    private bool InAttackRange(Building target)
+    {
+        Collider2D targetCollider =
+            target.GetComponent<Collider2D>();
+
+        if (targetCollider == null)
+            return false;
+
+
+        Collider2D[] hits =
+            Physics2D.OverlapCircleAll(
+                transform.position,
+                data.attackRange
+            );
+
+
+        foreach (Collider2D hit in hits)
+        {
+            if (hit == targetCollider)
+                return true;
+        }
+
+
+        return false;
+    }
+
+
+
     private void Attack(Building target)
     {
-        Debug.Log(
-            $"{name} π•ª˜ {target.name}£¨‘Ï≥… {data.attackDamage} µ„…À∫¶°£",
-            this
-        );
         target.TakeDamage(
             data.attackDamage
+        );
+    }
+
+
+
+    private void OnDrawGizmosSelected()
+    {
+        if (data == null)
+            return;
+
+
+        Gizmos.color = Color.red;
+
+        Gizmos.DrawWireSphere(
+            transform.position,
+            data.attackRange
         );
     }
 }
