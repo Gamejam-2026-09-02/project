@@ -13,6 +13,8 @@ public class BuildingData : ScriptableObject
     [TextArea]
     [SerializeField] private string description;
 
+    public GameObject prefab;
+
     [Header("·ÀÓù¹¥»÷")]
     public int AttackDamage = 10;
 

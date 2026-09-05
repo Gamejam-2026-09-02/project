@@ -3,9 +3,6 @@ using UnityEngine;
 public class EnemySpawnTest : MonoBehaviour
 {
     [SerializeField]
-    private GameObject unitPrefab;
-
-    [SerializeField]
     private UnitData unitData;
 
 
@@ -20,12 +17,6 @@ public class EnemySpawnTest : MonoBehaviour
 
     private void Spawn()
     {
-        if (unitPrefab == null)
-        {
-            Debug.LogError("Unit prefab 未设置");
-            return;
-        }
-
         if (unitData == null)
         {
             Debug.LogError("UnitData 未设置");
@@ -33,16 +24,21 @@ public class EnemySpawnTest : MonoBehaviour
         }
 
 
-        GameObject unit =
-            Instantiate(
-                unitPrefab,
-                transform.position,
-                Quaternion.identity
-            );
+        if (unitData.prefab == null)
+        {
+            Debug.LogError("UnitData 中的 unitPrefab 未设置");
+            return;
+        }
 
 
-        UnitMover mover =
-            unit.GetComponent<UnitMover>();
+        GameObject unit = Instantiate(
+            unitData.prefab,
+            transform.position,
+            Quaternion.identity
+        );
+
+
+        UnitMover mover = unit.GetComponent<UnitMover>();
 
         if (mover != null)
         {
@@ -50,8 +46,7 @@ public class EnemySpawnTest : MonoBehaviour
         }
 
 
-        UnitHealth health =
-            unit.GetComponent<UnitHealth>();
+        UnitHealth health = unit.GetComponent<UnitHealth>();
 
         if (health != null)
         {

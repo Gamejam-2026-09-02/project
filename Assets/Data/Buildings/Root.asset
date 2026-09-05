@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingName: Root
   description: 
+  prefab: {fileID: 4985825276884644060, guid: 649621d83ba391646bfde0e068c8e4e4, type: 3}
   AttackDamage: 10
   AttackInterval: 1
   AttackRange: 5

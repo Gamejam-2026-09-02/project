@@ -215,7 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b0ffd413c8b18641ba98a0235228f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barSize: {x: 1, y: 0.1}
+  barSize: {x: 5, y: 0.5}
   hideDelay: 2
   bottomOffset: 0.2
 --- !u!61 &-2033212197300405384

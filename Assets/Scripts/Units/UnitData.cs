@@ -8,6 +8,7 @@ public class UnitData : ScriptableObject
 {
     public string unitName;
 
+    public GameObject prefab;
 
     [Header(" Ù–‘")]
     public int maxHealth = 100;

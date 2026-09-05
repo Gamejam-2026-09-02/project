@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class BuildingPlacementPreview
 {
     private readonly BuildingData buildingData;
     private readonly BuildingData rootBuildingData;
+
 
     private readonly float previewAlpha = 0.5f;
     private readonly Color invalidColor = Color.red;
@@ -12,6 +14,7 @@ public class BuildingPlacementPreview
 
 
     private Building previewBuilding;
+
 
     private readonly List<Building> previewRoots =
         new List<Building>();
@@ -76,11 +79,9 @@ public class BuildingPlacementPreview
         );
 
 
-        SetColor(
-            previewBuilding.gameObject,
-            Color.white
-        );
+        ResetColor();
     }
+
 
 
 
@@ -108,6 +109,7 @@ public class BuildingPlacementPreview
 
 
 
+
     public void SetValid(
         bool valid)
     {
@@ -120,6 +122,44 @@ public class BuildingPlacementPreview
             valid
                 ? Color.white
                 : invalidColor
+        );
+    }
+
+
+
+
+    /// <summary>
+    /// 恢复建筑预览默认颜色
+    /// 用于连接模式
+    /// </summary>
+    public void ResetColor()
+    {
+        if (previewBuilding == null)
+            return;
+
+
+        SetColor(
+            previewBuilding.gameObject,
+            Color.white
+        );
+    }
+
+
+
+
+    /// <summary>
+    /// 控制建筑Ghost显示
+    /// 连接已有建筑时隐藏
+    /// </summary>
+    public void SetBuildingPreviewVisible(
+        bool value)
+    {
+        if (previewBuilding == null)
+            return;
+
+
+        previewBuilding.gameObject.SetActive(
+            value
         );
     }
 
@@ -142,6 +182,7 @@ public class BuildingPlacementPreview
         }
 
 
+
         GridMapManager map =
             GridMapManager.Instance;
 
@@ -158,6 +199,7 @@ public class BuildingPlacementPreview
 
 
 
+
         Building prefab =
             generator.GetPrefab(
                 rootBuildingData
@@ -166,6 +208,7 @@ public class BuildingPlacementPreview
 
         if (prefab == null)
             return;
+
 
 
 
@@ -180,14 +223,17 @@ public class BuildingPlacementPreview
 
 
 
+
         foreach (Vector2 point in path)
         {
             Vector2Int grid =
                 map.WorldToGrid(point);
 
 
+
             if (targetCells.Contains(grid))
                 continue;
+
 
 
             if (!generated.Add(grid))
@@ -201,6 +247,7 @@ public class BuildingPlacementPreview
                     map.GridToWorld(grid),
                     Quaternion.identity
                 );
+
 
 
             root.name =
@@ -218,6 +265,7 @@ public class BuildingPlacementPreview
             );
 
 
+
             SetColor(
                 root.gameObject,
                 valid
@@ -226,9 +274,11 @@ public class BuildingPlacementPreview
             );
 
 
+
             previewRoots.Add(root);
         }
     }
+
 
 
 
@@ -241,6 +291,7 @@ public class BuildingPlacementPreview
 
         if (buildingData == null)
             return result;
+
 
 
         Vector2Int[] cells =
@@ -261,6 +312,7 @@ public class BuildingPlacementPreview
         }
 
 
+
         return result;
     }
 
@@ -279,8 +331,10 @@ public class BuildingPlacementPreview
         }
 
 
+
         ClearRootPreview();
     }
+
 
 
 
@@ -295,6 +349,7 @@ public class BuildingPlacementPreview
                 );
             }
         }
+
 
 
         previewRoots.Clear();
@@ -317,6 +372,7 @@ public class BuildingPlacementPreview
             );
 
 
+
         foreach (Collider2D collider in colliders)
         {
             collider.enabled = false;
@@ -324,10 +380,12 @@ public class BuildingPlacementPreview
 
 
 
+
         MonoBehaviour[] behaviours =
             target.GetComponentsInChildren<MonoBehaviour>(
                 true
             );
+
 
 
         foreach (MonoBehaviour behaviour in behaviours)
@@ -346,6 +404,7 @@ public class BuildingPlacementPreview
             target.GetComponentsInChildren<SpriteRenderer>(
                 true
             );
+
 
 
         foreach (SpriteRenderer sprite in sprites)
@@ -368,11 +427,14 @@ public class BuildingPlacementPreview
             );
 
 
+
         Color final =
             color;
 
+
         final.a =
             previewAlpha;
+
 
 
 
@@ -384,10 +446,13 @@ public class BuildingPlacementPreview
 
 
 
+
+
         Renderer[] renderers =
             target.GetComponentsInChildren<Renderer>(
                 true
             );
+
 
 
         foreach (Renderer renderer in renderers)
@@ -396,8 +461,10 @@ public class BuildingPlacementPreview
                 continue;
 
 
+
             Material material =
                 renderer.material;
+
 
 
             if (material != null &&
