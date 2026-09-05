@@ -124,14 +124,28 @@ new();
     }
 
 
-    public void SetBuildingData(BuildingData data)
+    public void SetBuildingData(
+      BuildingData data)
     {
         if (data == null)
             return;
 
 
         buildingData = data;
+
+
+        preview.SetBuildingData(
+            data
+        );
+
+
+        if (hasStart)
+        {
+            preview.Create();
+        }
     }
+
+
     private void UpdateSelectStart()
     {
         if (Input.GetMouseButtonDown(0))
