@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2596799497f2a9142aa8055effefbcd0, type: 3}
-  m_Name: UnitData
+  m_Name: Attack Root
   m_EditorClassIdentifier: 
-  unitName: Ant
-  prefab: {fileID: 4770601872170871717, guid: 68d87abe505c8f749bc01452f5e3d03a, type: 3}
+  unitName: 
+  prefab: {fileID: 4770601872170871717, guid: 9c6821a1bf2e0f841bc984b50cebb374, type: 3}
   maxHealth: 15
-  attackDamage: 5
+  attackDamage: 8
   attackInterval: 1
-  attackRange: 1.5
+  attackRange: 2
   moveSpeed: 2
-  targetBuildingType: 3
+  targetBuildingType: 2
