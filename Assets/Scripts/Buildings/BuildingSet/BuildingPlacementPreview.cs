@@ -15,9 +15,17 @@ public class BuildingPlacementPreview
 
     private Building previewBuilding;
 
+    // [修改] 用字典替代 List,按格子坐标索引,支持增量更新而非全量重建
+    private readonly Dictionary<Vector2Int, Building> previewRootMap =
+        new Dictionary<Vector2Int, Building>();
 
-    private readonly List<Building> previewRoots =
-        new List<Building>();
+    // [修改] 复用临时集合,避免 ShowRoots 每次调用都 new HashSet
+    private readonly HashSet<Vector2Int> reusableTargetCells =
+        new HashSet<Vector2Int>();
+    private readonly HashSet<Vector2Int> reusablePathCells =
+        new HashSet<Vector2Int>();
+    private readonly List<Vector2Int> reusableRemoveKeys =
+        new List<Vector2Int>();
 
 
 
@@ -140,10 +148,6 @@ public class BuildingPlacementPreview
 
 
 
-    /// <summary>
-    /// 恢复建筑预览默认颜色
-    /// 用于连接模式
-    /// </summary>
     public void ResetColor()
     {
         if (previewBuilding == null)
@@ -159,10 +163,6 @@ public class BuildingPlacementPreview
 
 
 
-    /// <summary>
-    /// 控制建筑Ghost显示
-    /// 连接已有建筑时隐藏
-    /// </summary>
     public void SetBuildingPreviewVisible(
         bool value)
     {
@@ -178,154 +178,136 @@ public class BuildingPlacementPreview
 
 
 
+    // [修改] 整个方法从"全量销毁重建"改为"增量 diff 更新"
     public void ShowRoots(
         List<Vector2> path,
         Vector2Int targetPosition,
         bool valid)
     {
-        ClearRootPreview();
-
-
         if (path == null ||
             path.Count == 0 ||
             rootBuildingData == null)
         {
+            ClearRootPreview();
             return;
         }
-
 
 
         GridMapManager map =
             GridMapManager.Instance;
 
-
         BuildingGenerator generator =
             BuildingGenerator.Instance;
-
 
         if (map == null ||
             generator == null)
         {
+            ClearRootPreview();
             return;
         }
-
-
-
 
         Building prefab =
             generator.GetPrefab(
                 rootBuildingData
             );
 
-
         if (prefab == null)
-            return;
-
-
-
-
-        HashSet<Vector2Int> targetCells =
-            GetTargetCells(
-                targetPosition
-            );
-
-
-        HashSet<Vector2Int> generated =
-            new HashSet<Vector2Int>();
-
-
-
-
-        foreach (Vector2 point in path)
         {
-            Vector2Int grid =
-                map.WorldToGrid(point);
+            ClearRootPreview();
+            return;
+        }
 
 
+        // 计算目标位置占用格,用于路径排除
+        reusableTargetCells.Clear();
+        GetTargetCells(targetPosition, reusableTargetCells);
 
-            if (targetCells.Contains(grid))
+        // 计算本次需要显示的格子集合
+        reusablePathCells.Clear();
+
+        for (int i = 0; i < path.Count; i++)
+        {
+            Vector2Int grid = map.WorldToGrid(path[i]);
+
+            if (reusableTargetCells.Contains(grid))
                 continue;
 
+            reusablePathCells.Add(grid);
+        }
 
 
-            if (!generated.Add(grid))
+        // 移除不再需要的格子(旧格子里不在新集合中的)
+        reusableRemoveKeys.Clear();
+
+        foreach (KeyValuePair<Vector2Int, Building> pair in previewRootMap)
+        {
+            if (!reusablePathCells.Contains(pair.Key))
+            {
+                reusableRemoveKeys.Add(pair.Key);
+            }
+        }
+
+        for (int i = 0; i < reusableRemoveKeys.Count; i++)
+        {
+            Vector2Int key = reusableRemoveKeys[i];
+
+            if (previewRootMap.TryGetValue(key, out Building old) && old != null)
+            {
+                Object.Destroy(old.gameObject);
+            }
+
+            previewRootMap.Remove(key);
+        }
+
+
+        // 新增格子才 Instantiate,已存在的格子只更新颜色
+        Color finalColor = valid ? Color.white : invalidColor;
+
+        foreach (Vector2Int grid in reusablePathCells)
+        {
+            if (previewRootMap.TryGetValue(grid, out Building existing) && existing != null)
+            {
+                SetColor(existing.gameObject, finalColor);
                 continue;
+            }
 
-
-
-            Building root =
-                Object.Instantiate(
-                    prefab,
-                    map.GridToWorld(grid),
-                    Quaternion.identity
-                );
-
-
-
-            root.name =
-                $"Root_Preview_{grid.x}_{grid.y}";
-
-
-
-            DisablePreviewComponents(
-                root.gameObject
+            Building root = Object.Instantiate(
+                prefab,
+                map.GridToWorld(grid),
+                Quaternion.identity
             );
 
+            root.name = $"Root_Preview_{grid.x}_{grid.y}";
 
-            SetPreviewSortingOrder(
-                root.gameObject
-            );
+            DisablePreviewComponents(root.gameObject);
+            SetPreviewSortingOrder(root.gameObject);
+            SetColor(root.gameObject, finalColor);
 
-
-
-            SetColor(
-                root.gameObject,
-                valid
-                    ? Color.white
-                    : invalidColor
-            );
-
-
-
-            previewRoots.Add(root);
+            previewRootMap[grid] = root;
         }
     }
 
 
 
 
-    private HashSet<Vector2Int> GetTargetCells(
-        Vector2Int center)
+    // [修改] 改为填充传入的集合,避免每帧 new HashSet
+    private void GetTargetCells(
+        Vector2Int center,
+        HashSet<Vector2Int> result)
     {
-        HashSet<Vector2Int> result =
-            new HashSet<Vector2Int>();
-
-
         if (buildingData == null)
-            return result;
-
-
+            return;
 
         Vector2Int[] cells =
             buildingData.GetOccupiedCells();
 
-
-
         if (cells == null)
-            return result;
-
-
+            return;
 
         foreach (Vector2Int offset in cells)
         {
-            result.Add(
-                center + offset
-            );
+            result.Add(center + offset);
         }
-
-
-
-        return result;
     }
 
 
@@ -350,21 +332,18 @@ public class BuildingPlacementPreview
 
 
 
+    // [修改] 清空字典而非 List
     private void ClearRootPreview()
     {
-        for (int i = 0; i < previewRoots.Count; i++)
+        foreach (KeyValuePair<Vector2Int, Building> pair in previewRootMap)
         {
-            if (previewRoots[i] != null)
+            if (pair.Value != null)
             {
-                Object.Destroy(
-                    previewRoots[i].gameObject
-                );
+                Object.Destroy(pair.Value.gameObject);
             }
         }
 
-
-
-        previewRoots.Clear();
+        previewRootMap.Clear();
     }
 
 
@@ -429,6 +408,10 @@ public class BuildingPlacementPreview
 
 
 
+    // [修改] 非 SpriteRenderer 分支改用 MaterialPropertyBlock,避免 renderer.material 每次克隆材质实例
+    private static readonly MaterialPropertyBlock propertyBlock =
+        new MaterialPropertyBlock();
+
     private void SetColor(
         GameObject target,
         Color color)
@@ -472,19 +455,14 @@ public class BuildingPlacementPreview
             if (renderer is SpriteRenderer)
                 continue;
 
+            if (!renderer.sharedMaterial ||
+                !renderer.sharedMaterial.HasProperty("_Color"))
+                continue;
 
-
-            Material material =
-                renderer.material;
-
-
-
-            if (material != null &&
-                material.HasProperty("_Color"))
-            {
-                material.color =
-                    final;
-            }
+            propertyBlock.Clear();
+            renderer.GetPropertyBlock(propertyBlock);
+            propertyBlock.SetColor("_Color", final);
+            renderer.SetPropertyBlock(propertyBlock);
         }
     }
 }

@@ -83,10 +83,13 @@ public class EnemySpawner : MonoBehaviour
     {
         UpdateWaveText();
 
-        waveTimer = waveInterval;
+        Invoke("RestTime",1f);
     }
 
-
+    public void RestTime()
+    {
+        waveTimer = waveInterval;
+    }
 
     private void Update()
     {
