@@ -14,6 +14,7 @@ public class BuildingData : ScriptableObject
     [SerializeField] private string description;
 
     public GameObject prefab;
+    public Sprite icon;
 
     [Header("·ÀÓù¹¥»÷")]
     public int AttackDamage = 10;

@@ -15,6 +15,7 @@ MonoBehaviour:
   buildingName: "\u5411\u65E5\u8475"
   description: "\u6BCF\u79D2\u4EA7\u751F1\u5355\u4F4D\u8D44\u6E90"
   prefab: {fileID: 4985825276884644060, guid: ec5a189cfb3f2c24c9dc9b945ecbf73e, type: 3}
+  icon: {fileID: 1041750419, guid: b86e98dd350d1b542892fc2f23b79b57, type: 3}
   AttackDamage: 0
   AttackInterval: 0
   AttackRange: 0

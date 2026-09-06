@@ -68,12 +68,6 @@ public class EnemySpawner : MonoBehaviour
 
 
 
-    [Header("≤‚ ‘")]
-    [SerializeField]
-    private KeyCode spawnKey = KeyCode.Space;
-
-
-
     private readonly List<Vector3> spawnedPositions = new();
 
 

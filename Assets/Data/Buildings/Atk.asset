@@ -15,6 +15,7 @@ MonoBehaviour:
   buildingName: Atk
   description: "\u7BAD\u5854\uFF0C\u8FDC\u7A0B\u653B\u51FB"
   prefab: {fileID: 4985825276884644060, guid: 1d891ed0b08655a4eadd5a6c86389ccb, type: 3}
+  icon: {fileID: 1469950183, guid: 04222fa57899f7848bcdef51b5d74aa9, type: 3}
   AttackDamage: 5
   AttackInterval: 1
   AttackRange: 9

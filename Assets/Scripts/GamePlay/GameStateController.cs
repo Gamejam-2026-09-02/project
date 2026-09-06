@@ -23,7 +23,6 @@ public class GameStateController : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
 

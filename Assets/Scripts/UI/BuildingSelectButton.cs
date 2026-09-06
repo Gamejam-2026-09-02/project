@@ -14,6 +14,7 @@ public class BuildingSelectButton : MonoBehaviour
     private Button button;
 
     public TMP_Text text;
+    public Image image;
 
     public void Initialize(
         BuildingData data,
@@ -32,6 +33,7 @@ public class BuildingSelectButton : MonoBehaviour
         );
 
         text.text = buildingData.name;
+        image.sprite = buildingData.icon;
     }
 
 
