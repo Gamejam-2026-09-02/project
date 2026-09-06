@@ -17,7 +17,7 @@ MonoBehaviour:
   prefab: {fileID: 4985825276884644060, guid: 1d891ed0b08655a4eadd5a6c86389ccb, type: 3}
   AttackDamage: 5
   AttackInterval: 1
-  AttackRange: 4.5
+  AttackRange: 9
   MaxHP: 12
   resourceChange:
     type: 0

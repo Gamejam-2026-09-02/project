@@ -5,6 +5,7 @@ using UnityEngine;
 public class UnitMover : MonoBehaviour
 {
     [Header("单位数据")]
+    [HideInInspector]
     public UnitData data;
 
 
@@ -42,11 +43,15 @@ public class UnitMover : MonoBehaviour
     private float homeCheckTimer;
 
 
-
-    public void Initialize(UnitData unitData)
+    private void Awake()
     {
-        data = unitData;
+        data = GetComponent<UnitCore>().data;
     }
+
+    //public void Initialize(UnitData unitData)
+    //{
+    //    data = unitData;
+    //}
 
 
 

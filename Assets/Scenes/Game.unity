@@ -153,9 +153,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridMap: {fileID: 247813523}
-  showGrid: 0
+  showGrid: 1
   showWalkable: 0
-  showBlocked: 0
+  showBlocked: 1
   showOccupied: 0
   gridColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   walkableColor: {r: 0.6567028, g: 1, b: 0.63836473, a: 0.50980395}
@@ -518891,6 +518891,7 @@ GameObject:
   - component: {fileID: 1383373443}
   - component: {fileID: 1383373442}
   - component: {fileID: 1383373447}
+  - component: {fileID: 1383373448}
   m_Layer: 0
   m_Name: BuildingManager
   m_TagString: Untagged
@@ -518985,6 +518986,19 @@ MonoBehaviour:
   initialBuildings:
   - {fileID: 11400000, guid: 594e22710ff71b54c959322270f69b6e, type: 2}
   - {fileID: 11400000, guid: 7b8f4dbfbb4b5b04dae165fe985ad95d, type: 2}
+  - {fileID: 11400000, guid: 1e88f1f85c48a3144841c4738d02d523, type: 2}
+--- !u!114 &1383373448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1383373441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06c41b9f042a4234fab57644aad0b8a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1818805277
 GameObject:
   m_ObjectHideFlags: 0

@@ -37,6 +37,9 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        if (GameStateController.Instance.IsPaused)
+            return;
+
         UpdateMovement();
         UpdateZoom();
     }

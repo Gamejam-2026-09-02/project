@@ -69,8 +69,8 @@ public class BuildingAttack : MonoBehaviour
 
     private void Attack(UnitMover target)
     {
-        UnitHealth health =
-            target.GetComponent<UnitHealth>();
+        UnitCore health =
+            target.GetComponent<UnitCore>();
 
 
         if (health != null)

@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +13,7 @@ public class BuildingSelectButton : MonoBehaviour
 
     private Button button;
 
-
+    public TMP_Text text;
 
     public void Initialize(
         BuildingData data,
@@ -29,6 +30,8 @@ public class BuildingSelectButton : MonoBehaviour
         button.onClick.AddListener(
             Select
         );
+
+        text.text = buildingData.name;
     }
 
 

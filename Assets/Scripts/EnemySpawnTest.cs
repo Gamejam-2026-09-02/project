@@ -37,16 +37,7 @@ public class EnemySpawnTest : MonoBehaviour
             Quaternion.identity
         );
 
-
-        UnitMover mover = unit.GetComponent<UnitMover>();
-
-        if (mover != null)
-        {
-            mover.Initialize(unitData);
-        }
-
-
-        UnitHealth health = unit.GetComponent<UnitHealth>();
+        UnitCore health = unit.GetComponent<UnitCore>();
 
         if (health != null)
         {

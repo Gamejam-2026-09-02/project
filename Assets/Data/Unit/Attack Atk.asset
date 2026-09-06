@@ -18,5 +18,5 @@ MonoBehaviour:
   attackDamage: 3
   attackInterval: 1
   attackRange: 2
-  moveSpeed: 1
+  moveSpeed: 2
   targetBuildingType: 3
