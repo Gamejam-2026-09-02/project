@@ -13,12 +13,15 @@ MonoBehaviour:
   m_Name: Root
   m_EditorClassIdentifier: 
   buildingName: Root
-  description: 
+  description: "\u662F\u8FDE\u63A5\u4E3B\u57CE\u4E0E\u5176\u4ED6\u5EFA\u7B51\u7684\u6865\u6881\uFF0C\u6240\u6709\u5EFA\u7B51\u5FC5\u987B\u5EFA\u5728\u6839\u4E0A"
   prefab: {fileID: 4985825276884644060, guid: 649621d83ba391646bfde0e068c8e4e4, type: 3}
-  AttackDamage: 10
-  AttackInterval: 1
-  AttackRange: 5
-  MaxHP: 10
+  AttackDamage: 0
+  AttackInterval: 0
+  AttackRange: 0
+  MaxHP: 15
+  resourceChange:
+    type: 0
+    amount: 0
   Type: 2
   shapeType: 0
   squareSize: {x: 1, y: 1}

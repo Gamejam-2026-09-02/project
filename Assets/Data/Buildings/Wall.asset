@@ -10,28 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae712e638b47eba428170d75e1d81b8e, type: 3}
-  m_Name: Atk
+  m_Name: Wall
   m_EditorClassIdentifier: 
-  buildingName: Atk
-  description: "\u7BAD\u5854\uFF0C\u8FDC\u7A0B\u653B\u51FB"
-  prefab: {fileID: 4985825276884644060, guid: 1d891ed0b08655a4eadd5a6c86389ccb, type: 3}
-  AttackDamage: 5
-  AttackInterval: 1
-  AttackRange: 4.5
-  MaxHP: 12
+  buildingName: "\u5899"
+  description: "\u53EF\u4EE5\u963B\u6321\u654C\u4EBA"
+  prefab: {fileID: 4985825276884644060, guid: c5ad69f9693f496449cea10609a0ee6d, type: 3}
+  AttackDamage: 0
+  AttackInterval: 0
+  AttackRange: 0
+  MaxHP: 30
   resourceChange:
     type: 0
     amount: 0
   Type: 3
   shapeType: 0
-  squareSize: {x: 3, y: 3}
+  squareSize: {x: 1, y: 1}
   circleRadius: 1
   costs:
   - type: 0
-    amount: 4
+    amount: 3
   - type: 0
-    amount: 10
+    amount: 0
   - type: 0
-    amount: 10
-  - type: 0
-    amount: 10
+    amount: 0

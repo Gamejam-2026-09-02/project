@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2596799497f2a9142aa8055effefbcd0, type: 3}
-  m_Name: UnitData 1
+  m_Name: Attack Sunflower
   m_EditorClassIdentifier: 
   unitName: Ant
+  prefab: {fileID: 4770601872170871717, guid: 39388dc3521091946b1b79b409322409, type: 3}
   maxHealth: 15
-  attackDamage: 5
+  attackDamage: 3
   attackInterval: 1
-  attackRange: 1.5
-  moveSpeed: 2
+  attackRange: 2
+  moveSpeed: 1
   targetBuildingType: 1

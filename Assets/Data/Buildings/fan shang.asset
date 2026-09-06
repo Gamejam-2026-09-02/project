@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae712e638b47eba428170d75e1d81b8e, type: 3}
+  m_Name: fan shang
+  m_EditorClassIdentifier: 
+  buildingName: "\u53CD\u4F24"
+  description: "\u53EA\u80FD\u5EFA\u5728\u5176\u4ED6\u5EFA\u7B51\u4E0A\uFF0C\u5F53\u9644\u8EAB\u5EFA\u7B51\u88AB\u653B\u51FB\u65F6\u4F18\u5148\u53D7\u5230\u4F24\u5BB3\uFF0C\u53CD\u4F24\u6240\u6709\u653B\u51FB\u4ED6\u7684\u654C\u4EBA\uFF0C\u4E0D\u53EF\u53E0\u79CD"
+  prefab: {fileID: 4985825276884644060, guid: a633f757e36292444b9ec230b34e6713, type: 3}
+  AttackDamage: 5
+  AttackInterval: 0
+  AttackRange: 0
+  MaxHP: 20
+  resourceChange:
+    type: 0
+    amount: 0
+  Type: 3
+  shapeType: 0
+  squareSize: {x: 1, y: 1}
+  circleRadius: 1
+  costs:
+  - type: 0
+    amount: 5
+  - type: 0
+    amount: 0
+  - type: 0
+    amount: 0
+  - type: 0
+    amount: 0
+  - type: 0
+    amount: 0
