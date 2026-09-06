@@ -24,9 +24,6 @@ public class BuildingData : ScriptableObject
 
     public int MaxHP;
 
-    [Header("资源获取，负数为消耗")]
-    public ResourceCost resourceChange;
-
     [Header("类型")]
     public BuildingType Type;
 
@@ -168,7 +165,9 @@ public struct ResourceCost
 
 public enum ResourceType
 {
-    Water
+    Gold,
+    Wood,
+    Stone
 }
 
 public enum BuildingType

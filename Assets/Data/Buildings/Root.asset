@@ -25,4 +25,4 @@ MonoBehaviour:
   circleRadius: 1
   costs:
   - type: 0
-    amount: 1
+    amount: 10

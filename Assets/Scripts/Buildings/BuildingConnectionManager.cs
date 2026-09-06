@@ -51,6 +51,7 @@ public class BuildingConnectionManager : MonoBehaviour
     /// </summary>
     public void Refresh()
     {
+        Debug.Log("刷新建筑连接状态");
         if (home == null ||
             GridMapManager.Instance == null)
         {

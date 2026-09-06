@@ -12,9 +12,10 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
 
     private bool initialized;
 
+
+    // µ±Ç°ÉúÃü
     private int currentHealth;
 
-    private float resourceTimer;
 
     public int MaxHealth =>
         data != null
@@ -128,38 +129,7 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
         initialized = true;
     }
 
-    private void Update()
-    {
-        if (!initialized)
-            return;
 
-
-        if (data == null)
-            return;
-
-
-        ResourceCost change =
-            data.resourceChange;
-
-
-        if (change.amount == 0)
-            return;
-
-
-        resourceTimer += Time.deltaTime;
-
-
-        if (resourceTimer >= 1f)
-        {
-            resourceTimer = 0;
-
-            PlayerGameDataManager.Instance
-                ?.AddResource(
-                    change.type,
-                    change.amount
-                );
-        }
-    }
 
     public virtual void Build(
         Vector2Int gridPosition)
