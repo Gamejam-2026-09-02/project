@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2596799497f2a9142aa8055effefbcd0, type: 3}
-  m_Name: UnitData 2
+  m_Name: BOSS1
   m_EditorClassIdentifier: 
   unitName: Ant
   maxHealth: 15
@@ -18,4 +18,4 @@ MonoBehaviour:
   attackInterval: 1
   attackRange: 1.5
   moveSpeed: 2
-  targetBuildingType: 2
+  targetBuildingType: 0
