@@ -97,7 +97,7 @@ public class UnitMover : MonoBehaviour
 
         Building newTarget;
 
-
+        Debug.Log("newTarget");
 
         if (IsHomeInDangerRange())
         {

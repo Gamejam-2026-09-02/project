@@ -33,6 +33,8 @@ public class BuildingInfoPanelController : MonoBehaviour
 
     private void Update()
     {
+        if (GameStateController.Instance.IsPaused) return;
+
         if (Input.GetMouseButtonDown(0))
         {
             TrySelectBuilding();
