@@ -110,6 +110,9 @@ new();
 
     private void Update()
     {
+        if (GameStateController.Instance.IsPaused)
+            return;
+
         switch (state)
         {
             case PreviewState.SelectStart:
