@@ -1,13 +1,14 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class PlayerGameData
 {
     [Header("资源")]
-    public int Water;
-    public int Wood;
-    public int Stone;
+
+    public Dictionary<ResourceType, int> Resources =
+        new();
 
     [Header("主城")]
     public int MainCityHealth;

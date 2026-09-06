@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BuildingPlacementPreview
 {
-    private readonly BuildingData buildingData;
+    private BuildingData buildingData;
     private readonly BuildingData rootBuildingData;
 
 
@@ -29,6 +29,18 @@ public class BuildingPlacementPreview
         this.rootBuildingData = rootBuildingData;
     }
 
+    public void SetBuildingData(
+    BuildingData data)
+    {
+        if (buildingData == data)
+            return;
+
+
+        buildingData = data;
+
+
+        Clear();
+    }
 
 
     public void Create()

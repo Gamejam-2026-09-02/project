@@ -36,8 +36,6 @@ public class BuildingPlacementController : MonoBehaviour
 
     private Vector2Int previewGridPosition;
 
-
-
     private Vector2Int lastPreviewGridPosition;
 
     private bool hasLastPreviewPosition;
@@ -62,13 +60,24 @@ public class BuildingPlacementController : MonoBehaviour
 
     private BuildingPlacementPath pathFinder;
 
-    private BuildingConnector connector;
+    private BuildingPlacementValidator validator;
 
+    private BuildingPlacementExecutor executor;
 
-
+    public static Dictionary<ResourceType, int> CurrentCost
+    {
+        get;
+        private set;
+    }
+=
+new();
 
     private void Awake()
     {
+        pathFinder =
+            new BuildingPlacementPath();
+
+
         preview =
             new BuildingPlacementPreview(
                 buildingData,
@@ -76,13 +85,15 @@ public class BuildingPlacementController : MonoBehaviour
             );
 
 
-        pathFinder =
-            new BuildingPlacementPath();
+        validator =
+            new BuildingPlacementValidator(
+                rootBuildingData,
+                pathFinder
+            );
 
 
-
-        connector =
-            new BuildingConnector(
+        executor =
+            new BuildingPlacementExecutor(
                 rootBuildingData,
                 pathFinder
             );
@@ -90,12 +101,10 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-
     private void Start()
     {
         EnterSelectStart();
     }
-
 
 
 
@@ -115,6 +124,26 @@ public class BuildingPlacementController : MonoBehaviour
     }
 
 
+    public void SetBuildingData(
+      BuildingData data)
+    {
+        if (data == null)
+            return;
+
+
+        buildingData = data;
+
+
+        preview.SetBuildingData(
+            data
+        );
+
+
+        if (hasStart)
+        {
+            preview.Create();
+        }
+    }
 
 
     private void UpdateSelectStart()
@@ -125,9 +154,48 @@ public class BuildingPlacementController : MonoBehaviour
         }
     }
 
+    private void UpdateCurrentCost()
+    {
+        CurrentCost.Clear();
+
+
+        if (currentPath == null)
+            return;
+
+
+        AddCost(
+            buildingData.Costs
+        );
+
+
+        for (int i = 0; i < currentPath.Count; i++)
+        {
+            AddCost(
+                rootBuildingData.Costs
+            );
+        }
+    }
 
 
 
+    private void AddCost(
+        ResourceCost[] costs)
+    {
+        if (costs == null)
+            return;
+
+
+        foreach (ResourceCost cost in costs)
+        {
+            if (!CurrentCost.ContainsKey(cost.type))
+            {
+                CurrentCost[cost.type] = 0;
+            }
+
+
+            CurrentCost[cost.type] += cost.amount;
+        }
+    }
 
     private void TrySelectStart()
     {
@@ -140,7 +208,7 @@ public class BuildingPlacementController : MonoBehaviour
 
 
         if (map == null ||
-           cam == null)
+            cam == null)
         {
             return;
         }
@@ -165,7 +233,7 @@ public class BuildingPlacementController : MonoBehaviour
 
 
         if (node == null ||
-           !node.IsOccupied)
+            !node.IsOccupied)
         {
             return;
         }
@@ -178,7 +246,9 @@ public class BuildingPlacementController : MonoBehaviour
 
 
         if (startBuilding == null)
+        {
             return;
+        }
 
 
 
@@ -191,9 +261,6 @@ public class BuildingPlacementController : MonoBehaviour
 
         EnterSelectTarget();
     }
-
-
-
 
 
 
@@ -211,9 +278,6 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-
-
-
     private void UpdateSelectTarget()
     {
         UpdatePreview();
@@ -228,7 +292,7 @@ public class BuildingPlacementController : MonoBehaviour
 
 
         if (Input.GetMouseButtonDown(1) ||
-           Input.GetKeyDown(KeyCode.Escape))
+            Input.GetKeyDown(KeyCode.Escape))
         {
             EnterSelectStart();
         }
@@ -236,14 +300,12 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-
-
-
-
     private void UpdatePreview()
     {
         if (!hasStart)
+        {
             return;
+        }
 
 
 
@@ -257,7 +319,7 @@ public class BuildingPlacementController : MonoBehaviour
 
 
         if (map == null ||
-           cam == null)
+            cam == null)
         {
             return;
         }
@@ -282,7 +344,6 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-        // 每次检测鼠标当前建筑状态
         bool connectionStateChanged =
             UpdateConnectionPreviewState(
                 previewGridPosition
@@ -290,12 +351,10 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-        // 格子没有变化并且目标状态没有变化
-        // 不重新寻路
         if (hasLastPreviewPosition &&
-           lastPreviewGridPosition ==
-           previewGridPosition &&
-           !connectionStateChanged)
+            lastPreviewGridPosition ==
+            previewGridPosition &&
+            !connectionStateChanged)
         {
             return;
         }
@@ -312,10 +371,6 @@ public class BuildingPlacementController : MonoBehaviour
 
         RecalculatePreview();
     }
-
-
-
-
 
 
 
@@ -338,14 +393,13 @@ public class BuildingPlacementController : MonoBehaviour
 
 
         if (node != null &&
-           node.IsOccupied &&
-           node.Occupant != null &&
-           node.Occupant != startBuilding &&
-           !node.Occupant.ConnectedToHome)
+            node.IsOccupied &&
+            node.Occupant != null &&
+            node.Occupant != startBuilding &&
+            !node.Occupant.ConnectedToHome)
         {
             previewTargetBuilding =
                 node.Occupant;
-
 
 
             preview.SetBuildingPreviewVisible(
@@ -366,109 +420,25 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-
-
-
-
-
     private void RecalculatePreview()
     {
-        // ==========================
-        // 连接模式
-        // ==========================
-
-        if (previewTargetBuilding != null)
-        {
-            currentPath =
-                pathFinder.FindPath(
-                    startBuilding,
-                    startGridPosition,
-                    previewTargetBuilding.GridPosition,
-                    previewTargetBuilding.Data
-                );
-
-
-
-            bool valid =
-                currentPath != null &&
-                currentPath.Count > 0 &&
-                pathFinder.CanGenerateRoots(
-                    currentPath,
-                    previewTargetBuilding.GridPosition,
-                    rootBuildingData
-                );
-
-
-
-            isPreviewValid =
-                valid;
-
-
-
-            // 清除之前红色状态
-            preview.ResetColor();
-
-
-
-            preview.ShowRoots(
-                currentPath,
-                previewTargetBuilding.GridPosition,
-                valid
-            );
-
-
-            return;
-        }
-
-
-
-
-
-
-        // ==========================
-        // 建造模式
-        // ==========================
-
-
-        currentPath =
-            pathFinder.FindPath(
+        PlacementResult result =
+            validator.Validate(
                 startBuilding,
                 startGridPosition,
                 previewGridPosition,
+                previewTargetBuilding,
                 buildingData
             );
 
 
 
-        bool hasPath =
-            currentPath != null &&
-            currentPath.Count > 0;
-
-
-
-        bool canBuilding =
-            BuildingGenerator.Instance != null &&
-            BuildingGenerator.Instance.CanGenerate(
-                buildingData,
-                previewGridPosition
-            );
-
-
-
-        bool canRoot =
-            hasPath &&
-            pathFinder.CanGenerateRoots(
-                currentPath,
-                previewGridPosition,
-                rootBuildingData
-            );
-
+        currentPath =
+            result.path;
 
 
         isPreviewValid =
-            hasPath &&
-            canBuilding &&
-            canRoot;
+            result.valid;
 
 
 
@@ -478,17 +448,21 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
+        Vector2Int target =
+            previewTargetBuilding != null ?
+            previewTargetBuilding.GridPosition :
+            previewGridPosition;
+
+
+
         preview.ShowRoots(
             currentPath,
-            previewGridPosition,
+            target,
             isPreviewValid
         );
+
+        UpdateCurrentCost();
     }
-
-
-
-
-
 
 
 
@@ -511,14 +485,10 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-
-
-
-
     private void TryConnect(
         Building target)
     {
-        if (connector.TryConnect(
+        if (executor.Connect(
             startBuilding,
             target))
         {
@@ -528,47 +498,22 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-
-
-
-
     private void TryGenerate()
     {
         if (!isPreviewValid)
-            return;
-
-
-
-        if (!pathFinder.GenerateRoots(
-            currentPath,
-            previewGridPosition,
-            rootBuildingData))
         {
             return;
         }
 
 
 
-        BuildingGenerator generator =
-            BuildingGenerator.Instance;
-
-
-
-        if (generator == null)
+        if (!executor.Generate(
+            currentPath,
+            previewGridPosition,
+            buildingData))
+        {
             return;
-
-
-
-        Building building =
-            generator.Generate(
-                buildingData,
-                previewGridPosition
-            );
-
-
-
-        if (building == null)
-            return;
+        }
 
 
 
@@ -577,15 +522,10 @@ public class BuildingPlacementController : MonoBehaviour
 
 
 
-
-
-
-
     private void EnterSelectStart()
     {
         state =
             PreviewState.SelectStart;
-
 
 
         hasStart = false;
@@ -606,14 +546,11 @@ public class BuildingPlacementController : MonoBehaviour
         hasLastPreviewPosition = false;
 
 
+        CurrentCost.Clear();
+
 
         preview.Clear();
     }
-
-
-
-
-
 
 
     private void OnDestroy()
