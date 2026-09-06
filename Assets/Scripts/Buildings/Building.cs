@@ -80,6 +80,10 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
     public bool ConnectedToHome =>
         connectedToHome;
 
+    public event Action OnDestroyed;
+
+
+    private bool destroyed;
 
     public void SetConnection(bool value)
     {
@@ -410,6 +414,10 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
         }
 
         BuildingEvents.NotifyDestroyed(this);
+
+        destroyed = true;
+
+        OnDestroyed?.Invoke();
 
         Destroy(gameObject);
     }

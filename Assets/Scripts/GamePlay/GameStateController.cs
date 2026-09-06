@@ -6,6 +6,14 @@ public class GameStateController : MonoBehaviour
 
     public bool IsPaused { get; private set; }
 
+    private bool timePaused;
+
+
+    [Header("днЭЃекеж")]
+    [SerializeField]
+    private GameObject pauseMask;
+
+
     private void Awake()
     {
         if (Instance != null)
@@ -16,6 +24,15 @@ public class GameStateController : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SetPause(!timePaused);
+        }
     }
 
 
@@ -44,8 +61,16 @@ public class GameStateController : MonoBehaviour
     public void SetPause(bool pause)
     {
         if (pause)
-            PauseGame();
+        {
+            timePaused = true;
+            Time.timeScale = 0f;
+            pauseMask.SetActive(true);
+        }
         else
-            ResumeGame();
+        {
+            timePaused = false;
+            Time.timeScale = 1f;
+            pauseMask.SetActive(false);
+        }
     }
 }

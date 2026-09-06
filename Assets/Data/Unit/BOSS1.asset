@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2596799497f2a9142aa8055effefbcd0, type: 3}
   m_Name: BOSS1
   m_EditorClassIdentifier: 
-  unitName: Ant
+  unitName: boos1
   prefab: {fileID: 4770601872170871717, guid: 2bdb4f85a588d8b4eb8aaf0de6180532, type: 3}
   maxHealth: 60
   attackDamage: 6

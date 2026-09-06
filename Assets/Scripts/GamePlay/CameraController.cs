@@ -37,8 +37,8 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateController.Instance.IsPaused)
-            return;
+        //if (GameStateController.Instance.IsPaused)
+        //    return;
 
         UpdateMovement();
         UpdateZoom();
@@ -57,14 +57,14 @@ public class CameraController : MonoBehaviour
         currentVelocity = Vector2.MoveTowards(
             currentVelocity,
             targetVelocity,
-            rate * Time.deltaTime
+            rate * Time.unscaledDeltaTime
         );
 
         Vector3 movement = new Vector3(
             currentVelocity.x,
             currentVelocity.y,
             0f
-        ) * Time.deltaTime;
+        ) * Time.unscaledDeltaTime;
 
         transform.position += movement;
 

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2596799497f2a9142aa8055effefbcd0, type: 3}
   m_Name: BOSS2
   m_EditorClassIdentifier: 
-  unitName: 
+  unitName: boos2
   prefab: {fileID: 4770601872170871717, guid: 1058c5b8693da064785811503b49ac9a, type: 3}
   maxHealth: 60
   attackDamage: 6

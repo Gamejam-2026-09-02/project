@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 
 public class EnemySpawner : MonoBehaviour
@@ -111,11 +110,11 @@ public class EnemySpawner : MonoBehaviour
         }
 
 
-        if (Input.GetKeyDown(spawnKey))
-        {
-            waveTimer = 0f;
-            SpawnNextWave();
-        }
+        //if (Input.GetKeyDown(spawnKey))
+        //{
+        //    waveTimer = 0f;
+        //    SpawnNextWave();
+        //}
     }
 
 

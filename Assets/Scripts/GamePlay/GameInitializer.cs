@@ -1,18 +1,20 @@
 using UnityEngine;
 
-
 public class GameInitializer : MonoBehaviour
 {
     [SerializeField]
     private BuildingData mainCityData;
 
 
+    private Building mainCity;
+
+
+    public GameObject overPlane;
 
     private void Start()
     {
         GenerateMainCity();
     }
-
 
 
     private void GenerateMainCity()
@@ -24,9 +26,7 @@ public class GameInitializer : MonoBehaviour
         }
 
 
-        GridMapManager map =
-            GridMapManager.Instance;
-
+        GridMapManager map = GridMapManager.Instance;
 
         if (map == null)
         {
@@ -35,9 +35,7 @@ public class GameInitializer : MonoBehaviour
         }
 
 
-        BuildingGenerator generator =
-            BuildingGenerator.Instance;
-
+        BuildingGenerator generator = BuildingGenerator.Instance;
 
         if (generator == null)
         {
@@ -46,20 +44,16 @@ public class GameInitializer : MonoBehaviour
         }
 
 
-
-        Vector2Int center =
-            new Vector2Int(
-                map.GridSize.x / 2,
-                map.GridSize.y / 2
-            );
+        Vector2Int center = new Vector2Int(
+            map.GridSize.x / 2,
+            map.GridSize.y / 2
+        );
 
 
-
-        Building mainCity =
-            generator.Generate(
-                mainCityData,
-                center
-            );
+        mainCity = generator.Generate(
+            mainCityData,
+            center
+        );
 
 
         if (mainCity == null)
@@ -68,6 +62,8 @@ public class GameInitializer : MonoBehaviour
             return;
         }
 
+
+        mainCity.OnDestroyed += OnMainCityDestroyed;
 
 
         BuildingConnectionManager connection =
@@ -78,6 +74,34 @@ public class GameInitializer : MonoBehaviour
         {
             connection.SetHome(mainCity);
             connection.Refresh();
+        }
+    }
+
+
+    private void OnMainCityDestroyed()
+    {
+        Debug.Log("主城被摧毁，游戏结束");
+
+        GameOver();
+    }
+
+
+    private void GameOver()
+    {
+        // 结算逻辑
+        // 保存数据
+        // 显示结算UI
+        // 停止游戏
+        overPlane.SetActive(true);
+        Time.timeScale = 0;
+    }
+
+
+    private void OnDestroy()
+    {
+        if (mainCity != null)
+        {
+            mainCity.OnDestroyed -= OnMainCityDestroyed;
         }
     }
 }
