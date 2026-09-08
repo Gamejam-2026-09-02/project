@@ -67,89 +67,70 @@ public class BuildingPlacementPath
 
 
 
-        List<Vector2> shortest =
-            null;
+        // 修改：起点不再只取最近一格，而是按距离升序依次尝试，
+        // 跳过被占用（不可行走）或落在目标建筑占地内的格子，取第一个可行走的
+        Vector2Int? startEdgeResult =
+            GetClosestWalkableCell(
+                startEdges,
+                targetPosition,
+                targetCells,
+                map
+            );
 
-
-        int shortestLength =
-            int.MaxValue;
-
-
-
-        foreach (Vector2Int startEdge in startEdges)
+        if (startEdgeResult == null)
         {
-            GridNode startNode =
-                map.GetNode(startEdge);
+            return null;
+        }
 
-
-            if (startNode == null ||
-                !startNode.Walkable)
-            {
-                continue;
-            }
-
-
-            if (targetCells.Contains(startEdge))
-                continue;
+        Vector2Int startEdge =
+            startEdgeResult.Value;
 
 
 
-            foreach (Vector2Int targetEdge in targetEdges)
-            {
-                GridNode targetNode =
-                    map.GetNode(targetEdge);
+        // 修改：终点同理，按距离升序依次尝试，跳过被占用或落在起始建筑占地内的格子
+        Vector2Int? targetEdgeResult =
+            GetClosestWalkableCell(
+                targetEdges,
+                startEdge,
+                startCells,
+                map
+            );
 
+        if (targetEdgeResult == null)
+        {
+            return null;
+        }
 
-                if (targetNode == null ||
-                    !targetNode.Walkable)
-                {
-                    continue;
-                }
-
-
-                if (targetCells.Contains(targetEdge))
-                    continue;
-
-
-
-                List<Vector2> path =
-                    BuildingPathfinder.FindPath(
-                        map.GridToWorld(startEdge),
-                        map.GridToWorld(targetEdge)
-                    );
-
-
-                if (path == null ||
-                    path.Count == 0)
-                {
-                    continue;
-                }
+        Vector2Int targetEdge =
+            targetEdgeResult.Value;
 
 
 
-                if (PathContainsCells(
-                    path,
-                    targetCells,
-                    map))
-                {
-                    continue;
-                }
+        List<Vector2> path =
+            BuildingPathfinder.FindPath(
+                map.GridToWorld(startEdge),
+                map.GridToWorld(targetEdge)
+            );
 
 
-
-                if (path.Count < shortestLength)
-                {
-                    shortestLength =
-                        path.Count;
-
-                    shortest =
-                        path;
-                }
-            }
+        if (path == null ||
+            path.Count == 0)
+        {
+            return null;
         }
 
 
-        return shortest;
+
+        if (PathContainsCells(
+            path,
+            targetCells,
+            map))
+        {
+            return null;
+        }
+
+
+        return path;
     }
 
 
@@ -283,10 +264,11 @@ public class BuildingPlacementPath
 
 
             Building root =
-                generator.Generate(
-                    rootData,
-                    grid
-                );
+           generator.Generate(
+               rootData,
+               grid,
+               false   // 修改：根生成时静默，不触发连通性/单位重算
+           );
 
 
             if (root == null)
@@ -443,5 +425,55 @@ public class BuildingPlacementPath
 
 
         return false;
+    }
+
+
+
+    // 新增：在候选格子集合中，按到 reference 的距离升序依次尝试，
+    // 跳过落在 excludeCells 内的格子和不可行走的格子，返回第一个满足条件的格子。
+    // 复杂度：O(K log K) 排序 + O(K) 遍历（K 为候选格子数，即建筑边缘格子数量）
+    private Vector2Int? GetClosestWalkableCell(
+        IEnumerable<Vector2Int> candidates,
+        Vector2Int reference,
+        HashSet<Vector2Int> excludeCells,
+        GridMapManager map)
+    {
+        List<Vector2Int> sorted =
+            new List<Vector2Int>();
+
+        foreach (Vector2Int cell in candidates)
+        {
+            if (excludeCells.Contains(cell))
+                continue;
+
+            sorted.Add(cell);
+        }
+
+        sorted.Sort(
+            (a, b) =>
+            {
+                int distA =
+                    (a - reference).sqrMagnitude;
+
+                int distB =
+                    (b - reference).sqrMagnitude;
+
+                return distA.CompareTo(distB);
+            }
+        );
+
+        foreach (Vector2Int cell in sorted)
+        {
+            GridNode node =
+                map.GetNode(cell);
+
+            if (node != null &&
+                node.Walkable)
+            {
+                return cell;
+            }
+        }
+
+        return null;
     }
 }

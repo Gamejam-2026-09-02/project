@@ -163,8 +163,10 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
         }
     }
 
+    // 修改：新增 notify 参数，默认 true，不影响现有单独生成建筑（基地、敌方建筑）的调用
     public virtual void Build(
-        Vector2Int gridPosition)
+        Vector2Int gridPosition,
+        bool notify = true)
     {
         if (!initialized)
         {
@@ -172,35 +174,25 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
                 $"{name} 尚未初始化。",
                 this
             );
-
             return;
         }
-
 
         this.gridPosition =
             gridPosition;
 
-
-
         GridMapManager map =
             GridMapManager.Instance;
-
 
         if (map == null)
             return;
 
-
-
         Vector2Int[] cells =
             data.GetOccupiedCells();
-
-
 
         for (int i = 0; i < cells.Length; i++)
         {
             Vector2Int position =
                 gridPosition + cells[i];
-
 
             if (!map.Occupy(
                 position,
@@ -213,21 +205,23 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
             }
         }
 
-
-
         transform.position =
             map.GridToWorld(
                 gridPosition
             );
 
-
-
+        // 修改：Register 始终执行（保证 buildings 列表正确），
+        // 但是否广播 OnBuildingChanged 由 notify 控制
         if (BuildingManager.Instance != null)
         {
-            BuildingManager.Instance.Register(this);
+            BuildingManager.Instance.Register(this, notify);
         }
 
-        BuildingEvents.NotifyBuilt(this);
+        // 修改：批量生成中间步骤（根）传 notify:false 时跳过广播
+        if (notify)
+        {
+            BuildingEvents.NotifyBuilt(this);
+        }
     }
 
 

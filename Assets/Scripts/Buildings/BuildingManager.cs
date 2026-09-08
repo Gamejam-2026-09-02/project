@@ -28,20 +28,28 @@ public class BuildingManager : MonoBehaviour
 
 
 
-    public void Register(Building building)
+    // 修改：新增 notify 参数，默认 true 不影响现有调用方
+    public void Register(Building building, bool notify = true)
     {
         if (building == null)
             return;
-
 
         if (!buildings.Contains(building))
         {
             buildings.Add(building);
 
-            NotifyChanged();
+            if (notify)
+            {
+                NotifyChanged();
+            }
         }
     }
 
+    // 新增：供批量生成流程在整批完成后手动触发一次通知
+    public void NotifyChangedManually()
+    {
+        NotifyChanged();
+    }
 
     public void Unregister(Building building)
     {

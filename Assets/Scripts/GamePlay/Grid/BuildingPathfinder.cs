@@ -9,16 +9,17 @@ public static class BuildingPathfinder
         new(-1,0),
         new(0,1),
         new(0,-1),
-
         new(1,1),
         new(1,-1),
         new(-1,1),
         new(-1,-1)
     };
 
-
     private static int searchId;
 
+    // 修改：open 改为静态复用的二叉堆数组，避免每次调用分配 List/HashSet
+    private static readonly List<GridNode> openHeap = new();
+    private static readonly HashSet<GridNode> closed = new();
 
     public static List<Vector2> FindPath(
         Vector2 startWorld,
@@ -27,19 +28,14 @@ public static class BuildingPathfinder
         GridMapManager map =
             GridMapManager.Instance;
 
-
         if (map == null)
             return null;
-
 
         Vector2Int start =
             map.WorldToGrid(startWorld);
 
-
         Vector2Int end =
             map.WorldToGrid(endWorld);
-
-
 
         List<Vector2Int> gridPath =
             FindGridPath(
@@ -48,22 +44,14 @@ public static class BuildingPathfinder
                 end
             );
 
-
         if (gridPath == null)
             return null;
 
-
-
-        // 保留完整连续格子
         gridPath =
             AddBuildingCorners(gridPath);
 
-
-
         List<Vector2> result =
             new(gridPath.Count);
-
-
 
         foreach (Vector2Int cell in gridPath)
         {
@@ -72,11 +60,8 @@ public static class BuildingPathfinder
             );
         }
 
-
         return result;
     }
-
-
 
     private static List<Vector2Int> FindGridPath(
         GridMapManager map,
@@ -89,103 +74,63 @@ public static class BuildingPathfinder
         GridNode endNode =
             map.GetNode(end);
 
-
-
         if (startNode == null ||
            endNode == null)
             return null;
 
-
         if (!startNode.Walkable ||
            !endNode.Walkable)
             return null;
-
-
 
         searchId++;
 
         if (searchId == int.MaxValue)
             searchId = 1;
 
-
-
-        List<GridNode> open =
-            new();
-
-
-        HashSet<GridNode> closed =
-            new();
-
-
+        // 修改：复用静态容器，每次搜索前清空而不是重新分配
+        openHeap.Clear();
+        closed.Clear();
 
         InitializeNode(
             startNode,
             searchId
         );
 
-
         startNode.GCost = 0;
-
         startNode.HCost =
             GetDistance(
                 start,
                 end
             );
 
-
         startNode.Parent = null;
 
+        HeapPush(startNode);
 
-        open.Add(startNode);
-
-
-
-        while (open.Count > 0)
+        while (openHeap.Count > 0)
         {
+            // 修改：O(log n) 弹出最小节点，替代原来的 O(n) 线性扫描
             GridNode current =
-                open[0];
+                HeapPop();
 
-
-            for (int i = 1; i < open.Count; i++)
-            {
-                GridNode node =
-                    open[i];
-
-
-                if (node.FCost < current.FCost ||
-                   node.FCost == current.FCost &&
-                   node.HCost < current.HCost)
-                {
-                    current = node;
-                }
-            }
-
-
-
-            open.Remove(current);
+            // 修改：懒删除处理，跳过已经被更优路径处理过的重复节点
+            if (closed.Contains(current))
+                continue;
 
             closed.Add(current);
-
-
 
             if (current == endNode)
             {
                 return BuildPath(endNode);
             }
 
-
-
             foreach (Vector2Int dir in Directions)
             {
                 Vector2Int next =
                     current.Position + dir;
 
-
-
                 GridNode nextNode =
                     map.GetNode(next);
-
-
 
                 if (nextNode == null ||
                    !nextNode.Walkable ||
@@ -193,8 +138,6 @@ public static class BuildingPathfinder
                 {
                     continue;
                 }
-
-
 
                 if (IsDiagonal(
                     current.Position,
@@ -209,14 +152,10 @@ public static class BuildingPathfinder
                     }
                 }
 
-
-
                 InitializeNode(
                     nextNode,
                     searchId
                 );
-
-
 
                 int moveCost =
                     IsDiagonal(
@@ -225,25 +164,17 @@ public static class BuildingPathfinder
                     ? 14
                     : 10;
 
-
-
                 int newCost =
                     current.GCost +
                     moveCost;
 
-
-
-                bool isNew =
-                    !open.Contains(nextNode);
-
-
-
-                if (isNew ||
-                   newCost < nextNode.GCost)
+                // 修改：不再需要 isNew/Contains 判断，
+                // 因为 GCost 在 InitializeNode 中已重置为“无穷大”，
+                // 只要新路径更优就直接更新并压入堆
+                if (newCost < nextNode.GCost)
                 {
                     nextNode.GCost =
                         newCost;
-
 
                     nextNode.HCost =
                         GetDistance(
@@ -251,22 +182,93 @@ public static class BuildingPathfinder
                             end
                         );
 
-
                     nextNode.Parent =
                         current;
 
-
-                    if (isNew)
-                        open.Add(nextNode);
+                    HeapPush(nextNode);
                 }
             }
         }
 
-
         return null;
     }
 
+    // 新增：二叉堆 push，O(log n)
+    private static void HeapPush(GridNode node)
+    {
+        openHeap.Add(node);
 
+        int i = openHeap.Count - 1;
+
+        while (i > 0)
+        {
+            int parent = (i - 1) / 2;
+
+            if (Compare(openHeap[i], openHeap[parent]) < 0)
+            {
+                (openHeap[i], openHeap[parent]) =
+                    (openHeap[parent], openHeap[i]);
+
+                i = parent;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    // 新增：二叉堆 pop，O(log n)
+    private static GridNode HeapPop()
+    {
+        GridNode root = openHeap[0];
+
+        int last = openHeap.Count - 1;
+
+        openHeap[0] = openHeap[last];
+        openHeap.RemoveAt(last);
+
+        int i = 0;
+        int count = openHeap.Count;
+
+        while (true)
+        {
+            int left = i * 2 + 1;
+            int right = i * 2 + 2;
+            int smallest = i;
+
+            if (left < count &&
+                Compare(openHeap[left], openHeap[smallest]) < 0)
+            {
+                smallest = left;
+            }
+
+            if (right < count &&
+                Compare(openHeap[right], openHeap[smallest]) < 0)
+            {
+                smallest = right;
+            }
+
+            if (smallest == i)
+                break;
+
+            (openHeap[i], openHeap[smallest]) =
+                (openHeap[smallest], openHeap[i]);
+
+            i = smallest;
+        }
+
+        return root;
+    }
+
+    // 新增：堆排序比较规则，与原线性扫描的比较逻辑保持一致（FCost 优先，HCost 次之）
+    private static int Compare(GridNode a, GridNode b)
+    {
+        if (a.FCost != b.FCost)
+            return a.FCost.CompareTo(b.FCost);
+
+        return a.HCost.CompareTo(b.HCost);
+    }
 
     private static bool IsDiagonal(
         Vector2Int a,
@@ -275,8 +277,6 @@ public static class BuildingPathfinder
         return a.x != b.x &&
                a.y != b.y;
     }
-
-
 
     private static bool CanMoveDiagonal(
         GridMapManager map,
@@ -291,7 +291,6 @@ public static class BuildingPathfinder
                 )
             );
 
-
         GridNode sideB =
             map.GetNode(
                 new Vector2Int(
@@ -300,14 +299,11 @@ public static class BuildingPathfinder
                 )
             );
 
-
         return sideA != null &&
                sideB != null &&
                sideA.Walkable &&
                sideB.Walkable;
     }
-
-
 
     private static void InitializeNode(
         GridNode node,
@@ -316,15 +312,15 @@ public static class BuildingPathfinder
         if (node.SearchId == id)
             return;
 
-
         node.SearchId = id;
 
-        node.GCost = 0;
+        // 修改：GCost 初始化为“无穷大”而不是 0，
+        // 因为堆的懒删除方式不再依赖 open.Contains 判断是否为新节点，
+        // 而是直接靠 GCost 比较决定是否需要松弛更新
+        node.GCost = int.MaxValue;
         node.HCost = 0;
         node.Parent = null;
     }
-
-
 
     private static int GetDistance(
         Vector2Int a,
@@ -340,21 +336,15 @@ public static class BuildingPathfinder
                 a.y - b.y
             );
 
-
         int diagonal =
             Mathf.Min(dx, dy);
-
 
         int straight =
             Mathf.Abs(dx - dy);
 
-
-
         return diagonal * 14 +
                straight * 10;
     }
-
-
 
     private static List<Vector2Int> BuildPath(
         GridNode end)
@@ -362,10 +352,8 @@ public static class BuildingPathfinder
         List<Vector2Int> result =
             new();
 
-
         GridNode current =
             end;
-
 
         while (current != null)
         {
@@ -377,41 +365,26 @@ public static class BuildingPathfinder
                 current.Parent;
         }
 
-
         result.Reverse();
-
 
         return result;
     }
 
-
-
-    /// <summary>
-    /// 增加建筑线路拐角
-    /// 但不删除格子
-    /// </summary>
     private static List<Vector2Int> AddBuildingCorners(
         List<Vector2Int> path)
     {
         if (path.Count <= 2)
             return path;
 
-
-
         List<Vector2Int> result =
             new();
 
-
         result.Add(path[0]);
-
 
         Vector2Int lastDir =
             path[1] - path[0];
 
-
         int straightCount = 0;
-
-
 
         for (int i = 1;
             i < path.Count - 1;
@@ -421,11 +394,7 @@ public static class BuildingPathfinder
                 path[i + 1] -
                 path[i];
 
-
-
             straightCount++;
-
-
 
             if (dir != lastDir)
             {
@@ -444,32 +413,21 @@ public static class BuildingPathfinder
                 straightCount = 0;
             }
 
-
             lastDir = dir;
         }
-
-
 
         result.Add(
             path[^1]
         );
 
-
         return ExpandPath(result);
     }
 
-
-
-    /// <summary>
-    /// 将控制点重新展开为连续格子
-    /// </summary>
     private static List<Vector2Int> ExpandPath(
         List<Vector2Int> points)
     {
         List<Vector2Int> result =
             new();
-
-
 
         for (int i = 0;
             i < points.Count - 1;
@@ -481,8 +439,6 @@ public static class BuildingPathfinder
             Vector2Int end =
                 points[i + 1];
 
-
-
             int length =
                 Mathf.Max(
                     Mathf.Abs(
@@ -493,16 +449,12 @@ public static class BuildingPathfinder
                     )
                 );
 
-
-
             for (int j = 0;
                 j < length;
                 j++)
             {
                 float t =
                     j / (float)length;
-
-
 
                 Vector2Int cell =
                     Vector2Int.RoundToInt(
@@ -513,7 +465,6 @@ public static class BuildingPathfinder
                         )
                     );
 
-
                 if (result.Count == 0 ||
                    result[^1] != cell)
                 {
@@ -522,8 +473,6 @@ public static class BuildingPathfinder
             }
         }
 
-
-
         if (result.Count == 0 ||
            result[^1] != points[^1])
         {
@@ -531,7 +480,6 @@ public static class BuildingPathfinder
                 points[^1]
             );
         }
-
 
         return result;
     }

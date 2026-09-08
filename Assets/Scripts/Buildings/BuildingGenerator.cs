@@ -37,9 +37,11 @@ public class BuildingGenerator : MonoBehaviour
     // 生成
     // =========================================================
 
+    // 修改：新增 notify 参数并透传给 Build，默认 true 不影响现有调用方
     public Building Generate(
         BuildingData data,
-        Vector2Int gridPosition)
+        Vector2Int gridPosition,
+        bool notify = true)
     {
         if (!CanGenerate(
                 data,
@@ -48,40 +50,33 @@ public class BuildingGenerator : MonoBehaviour
             return null;
         }
 
-
         if (data == null ||
             data.prefab == null)
         {
             Debug.LogError(
                 $"建筑数据或预制体为空：{data?.Name}"
             );
-
             return null;
         }
-
 
         GridMapManager map =
             GridMapManager.Instance;
 
-
         GameObject obj =
-      Instantiate(
-          data.prefab,
-          map.GridToWorld(gridPosition),
-          Quaternion.identity
-      );
-
+            Instantiate(
+                data.prefab,
+                map.GridToWorld(gridPosition),
+                Quaternion.identity
+            );
 
         Building building =
             obj.GetComponent<Building>();
-
 
         if (building == null)
         {
             Debug.LogError(
                 $"建筑预制体缺少 Building 组件：{data.Name}"
             );
-
             Destroy(obj);
             return null;
         }
@@ -90,11 +85,11 @@ public class BuildingGenerator : MonoBehaviour
             IsRoot(data)
         );
 
-
+        // 修改：透传 notify
         building.Build(
-            gridPosition
+            gridPosition,
+            notify
         );
-
 
         return building;
     }

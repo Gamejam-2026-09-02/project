@@ -28,82 +28,58 @@ public class BuildingPlacementExecutor
         if (path == null ||
             path.Count == 0)
         {
-            Debug.Log(
-                "建造失败: 无有效路径"
-            );
-
+            Debug.Log("建造失败: 无有效路径");
             return false;
         }
-
-
 
         if (!pathFinder.GenerateRoots(
             path,
             position,
             rootData))
         {
-            Debug.Log(
-                "建造失败: Root生成失败"
-            );
-
+            Debug.Log("建造失败: Root生成失败");
             return false;
         }
-
-
 
         BuildingGenerator generator =
             BuildingGenerator.Instance;
 
-
-
         if (generator == null)
         {
-            Debug.Log(
-                "建造失败: BuildingGenerator不存在"
-            );
-
+            Debug.Log("建造失败: BuildingGenerator不存在");
             return false;
         }
 
-
-
+        // 修改：目标建筑生成时也静默，避免和根一起造成中间态的重复广播
         Building building =
             generator.Generate(
                 buildingData,
-                position
+                position,
+                false
             );
-
-
 
         if (building == null)
         {
-            Debug.Log(
-                "建造失败: 建筑生成失败"
-            );
-
+            Debug.Log("建造失败: 建筑生成失败");
             return false;
         }
-
-
 
         ConsumeResource(
             buildingData,
             path
         );
 
+        // 新增：整批（根 + 目标建筑）全部生成完毕后，统一广播一次
+        BuildingEvents.NotifyBuilt(building);
 
+        if (BuildingManager.Instance != null)
+        {
+            BuildingManager.Instance.NotifyChangedManually();
+        }
 
-        Debug.Log(
-            $"建造成功: {buildingData.name}"
-        );
-
-
+        Debug.Log($"建造成功: {buildingData.name}");
         return true;
     }
-
-
-
-
 
     public bool Connect(
         Building start,
@@ -115,33 +91,31 @@ public class BuildingPlacementExecutor
                 pathFinder
             );
 
-
         bool result =
             connector.TryConnect(
                 start,
                 target
             );
 
-
         if (result)
         {
-            Debug.Log(
-                $"连接成功: {start.name} -> {target.name}"
-            );
+            Debug.Log($"连接成功: {start.name} -> {target.name}");
+
+            // 新增：连接过程中生成的根都是静默的，这里统一触发一次
+            BuildingEvents.NotifyBuilt(target);
+
+            if (BuildingManager.Instance != null)
+            {
+                BuildingManager.Instance.NotifyChangedManually();
+            }
         }
         else
         {
-            Debug.Log(
-                $"连接失败: {start.name} -> {target.name}"
-            );
+            Debug.Log($"连接失败: {start.name} -> {target.name}");
         }
-
 
         return result;
     }
-
-
-
 
 
     private void ConsumeResource(
