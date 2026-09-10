@@ -829,8 +829,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 40
-  acceleration: 30
-  deceleration: 40
+  acceleration: 100
+  deceleration: 140
   edgeMoveEnabled: 1
   edgeSize: 40
   zoomSpeed: 5

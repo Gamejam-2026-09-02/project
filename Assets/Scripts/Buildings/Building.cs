@@ -82,26 +82,32 @@ public class Building : MonoBehaviour, IBuilding, IDamageable
 
     public event Action OnDestroyed;
 
+    // 新增：缓存 SpriteRenderer，避免 SetConnection 每次调用都 GetComponent
+    private SpriteRenderer cachedRenderer;
+
+    private void Awake()
+    {
+        // 新增：Awake 时缓存一次，Building 目前没有其他 Awake 逻辑
+        cachedRenderer = GetComponent<SpriteRenderer>();
+    }
 
     public void SetConnection(bool value)
     {
+        // 修改：值未变化时跳过，避免无意义的重复赋值和视觉刷新
+        if (connectedToHome == value)
+            return;
+
         connectedToHome = value;
-
-
         ApplyConnectionVisual();
     }
 
-
     private void ApplyConnectionVisual()
     {
-        SpriteRenderer renderer =
-            GetComponent<SpriteRenderer>();
-
-        if (renderer == null)
+        // 修改：使用缓存的 renderer，不再每次 GetComponent
+        if (cachedRenderer == null)
             return;
 
-
-        renderer.color =
+        cachedRenderer.color =
             connectedToHome
             ? Color.white
             : Color.gray;

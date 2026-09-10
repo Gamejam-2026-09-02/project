@@ -537,7 +537,54 @@ public class UnitMover : MonoBehaviour
     }
 
 
+    // 新增：低成本过滤，判断这个单位是否真的需要重新找目标。
+    // 不涉及 FindNearest/GetNearestWalkableCell/A*，只做距离比较，O(1)。
+    public bool ShouldRetarget(
+        Building changedBuilding,
+        bool destroyed)
+    {
+        if (data == null ||
+            changedBuilding == null)
+        {
+            return false;
+        }
 
+        // 目标建筑被摧毁：必须重新找目标
+        if (destroyed)
+        {
+            return changedBuilding == targetBuilding;
+        }
+
+        // 目前还没有目标：必须找一次
+        if (targetBuilding == null)
+        {
+            return true;
+        }
+
+        // 新建筑类型和单位关心的目标类型无关，忽略
+        // （FindNearest 内部只按 data.targetBuildingType 或 Home 类型筛选，这里保持一致）
+        bool relevantType =
+            changedBuilding.Type == data.targetBuildingType ||
+            changedBuilding.Type == BuildingType.Home;
+
+        if (!relevantType)
+            return false;
+
+        float distToNew =
+            Vector2.Distance(
+                transform.position,
+                changedBuilding.transform.position
+            );
+
+        float distToCurrent =
+            Vector2.Distance(
+                transform.position,
+                targetBuilding.transform.position
+            );
+
+        // 只有新建筑比当前目标更近时，才值得重新计算
+        return distToNew < distToCurrent;
+    }
 
 
     private void StopMoving()

@@ -6,13 +6,13 @@ public class BuildingManager : MonoBehaviour
 {
     public static BuildingManager Instance { get; private set; }
 
-
     private readonly List<Building> buildings = new();
 
+    // 新增：暴露只读视图，供 BuildingConnectionManager 等外部直接复用，
+    // 避免重复用 FindObjectsByType 做全场景扫描
+    public IReadOnlyList<Building> Buildings => buildings;
 
     public event Action OnBuildingChanged;
-
-
 
     private void Awake()
     {
@@ -22,13 +22,9 @@ public class BuildingManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
     }
 
-
-
-    // 修改：新增 notify 参数，默认 true 不影响现有调用方
     public void Register(Building building, bool notify = true)
     {
         if (building == null)
@@ -45,17 +41,10 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    // 新增：供批量生成流程在整批完成后手动触发一次通知
-    public void NotifyChangedManually()
-    {
-        NotifyChanged();
-    }
-
     public void Unregister(Building building)
     {
         if (building == null)
             return;
-
 
         if (buildings.Remove(building))
         {
@@ -63,47 +52,39 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-
+    public void NotifyChangedManually()
+    {
+        NotifyChanged();
+    }
 
     private void NotifyChanged()
     {
         OnBuildingChanged?.Invoke();
     }
 
-
-
     public Building FindNearest(
         Vector2 position,
         BuildingType type)
     {
         Building result = null;
-
         float minDistance =
             float.MaxValue;
-
-
 
         for (int i = 0; i < buildings.Count; i++)
         {
             Building building =
                 buildings[i];
 
-
             if (building == null)
                 continue;
 
-
             if (building.Type != type)
                 continue;
-
-
 
             float distance =
                 ((Vector2)building.transform.position -
                  position)
                 .sqrMagnitude;
-
-
 
             if (distance < minDistance)
             {
@@ -111,7 +92,6 @@ public class BuildingManager : MonoBehaviour
                 result = building;
             }
         }
-
 
         return result;
     }

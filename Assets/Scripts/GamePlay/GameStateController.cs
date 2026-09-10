@@ -28,6 +28,8 @@ public class GameStateController : MonoBehaviour
 
     private void Update()
     {
+        if (IsPaused) return;
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             SetPause(!timePaused);
