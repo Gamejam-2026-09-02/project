@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae712e638b47eba428170d75e1d81b8e, type: 3}
   m_Name: Atk
   m_EditorClassIdentifier: 
-  buildingName: Atk
-  description: "\u7BAD\u5854\uFF0C\u8FDC\u7A0B\u653B\u51FB"
+  buildingName: "\u5B62\u5B50\u5854"
+  description: "\u6295\u5C04\u5355\u4F53\u5B62\u5B50\uFF0C\u8FDC\u7A0B\u653B\u51FB"
   prefab: {fileID: 4985825276884644060, guid: 1d891ed0b08655a4eadd5a6c86389ccb, type: 3}
   icon: {fileID: 1469950183, guid: 04222fa57899f7848bcdef51b5d74aa9, type: 3}
   AttackDamage: 5
@@ -29,10 +29,4 @@ MonoBehaviour:
   circleRadius: 1
   costs:
   - type: 0
-    amount: 4
-  - type: 0
-    amount: 10
-  - type: 0
-    amount: 10
-  - type: 0
-    amount: 10
+    amount: 20

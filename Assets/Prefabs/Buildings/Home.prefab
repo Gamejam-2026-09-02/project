@@ -218,6 +218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barSize: {x: 5, y: 0.5}
   hideDelay: 2
+  alwaysShowWhenNotFullHealth: 1
   bottomOffset: 0.2
 --- !u!61 &-2033212197300405384
 BoxCollider2D:

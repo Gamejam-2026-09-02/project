@@ -24,6 +24,8 @@ public class WorldHealthBar : MonoBehaviour
     private float hideDelay;
 
 
+    private bool alwaysShow;
+
 
     private void Awake()
     {
@@ -44,11 +46,16 @@ public class WorldHealthBar : MonoBehaviour
         this.worldOffset = offset;
         this.hideDelay = hideDelay;
 
-
         rectTransform.sizeDelta = size;
 
-        // 防止单位缩放影响血条
         rectTransform.localScale = Vector3.one;
+    }
+
+
+
+    public void SetAlwaysShow(bool value)
+    {
+        alwaysShow = value;
     }
 
 
@@ -68,7 +75,6 @@ public class WorldHealthBar : MonoBehaviour
     {
         if (target == null)
             return;
-
 
         fill.fillAmount =
             (float)target.CurrentHealth /
@@ -100,6 +106,10 @@ public class WorldHealthBar : MonoBehaviour
         Refresh();
 
 
+        if (alwaysShow)
+            return;
+
+
         hideTimer -= Time.deltaTime;
 
 
@@ -116,5 +126,10 @@ public class WorldHealthBar : MonoBehaviour
         target = null;
         followTarget = null;
         worldOffset = Vector3.zero;
+
+        hideTimer = 0;
+        hideDelay = 0;
+
+        alwaysShow = false;
     }
 }

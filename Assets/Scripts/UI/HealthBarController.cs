@@ -10,6 +10,10 @@ public class HealthBarController : MonoBehaviour
     [SerializeField]
     private float hideDelay = 2f;
 
+    [Header("œ‘ æ")]
+    [SerializeField]
+    private bool alwaysShowWhenNotFullHealth;
+
 
     [Header("Œª÷√∆´“∆")]
     [SerializeField]
@@ -61,6 +65,8 @@ public class HealthBarController : MonoBehaviour
                 barSize,
                 hideDelay
             );
+
+            bar.SetAlwaysShow(alwaysShowWhenNotFullHealth);
         }
 
         bar.Show();

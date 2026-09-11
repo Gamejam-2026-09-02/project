@@ -6,6 +6,7 @@ public class BuildingPlacementController : MonoBehaviour
 {
     private enum PreviewState
     {
+        None,
         SelectStart,
         SelectTarget
     }
@@ -64,13 +65,16 @@ public class BuildingPlacementController : MonoBehaviour
 
     private BuildingPlacementExecutor executor;
 
+
+
     public static Dictionary<ResourceType, int> CurrentCost
     {
         get;
         private set;
     }
-=
-new();
+    = new();
+
+
 
     private void Awake()
     {
@@ -103,7 +107,12 @@ new();
 
     private void Start()
     {
-        EnterSelectStart();
+        state =
+            PreviewState.None;
+
+        preview.Clear();
+
+        CurrentCost.Clear();
     }
 
 
@@ -112,6 +121,7 @@ new();
     {
         if (GameStateController.Instance.IsPaused)
             return;
+
 
         switch (state)
         {
@@ -127,8 +137,12 @@ new();
     }
 
 
+
+    /// <summary>
+    /// 外部调用入口
+    /// </summary>
     public void SetBuildingData(
-      BuildingData data)
+        BuildingData data)
     {
         if (data == null)
             return;
@@ -142,11 +156,9 @@ new();
         );
 
 
-        if (hasStart)
-        {
-            preview.Create();
-        }
+        EnterSelectStart();
     }
+
 
 
     private void UpdateSelectStart()
@@ -157,48 +169,7 @@ new();
         }
     }
 
-    private void UpdateCurrentCost()
-    {
-        CurrentCost.Clear();
 
-
-        if (currentPath == null)
-            return;
-
-
-        AddCost(
-            buildingData.Costs
-        );
-
-
-        for (int i = 0; i < currentPath.Count; i++)
-        {
-            AddCost(
-                rootBuildingData.Costs
-            );
-        }
-    }
-
-
-
-    private void AddCost(
-        ResourceCost[] costs)
-    {
-        if (costs == null)
-            return;
-
-
-        foreach (ResourceCost cost in costs)
-        {
-            if (!CurrentCost.ContainsKey(cost.type))
-            {
-                CurrentCost[cost.type] = 0;
-            }
-
-
-            CurrentCost[cost.type] += cost.amount;
-        }
-    }
 
     private void TrySelectStart()
     {
@@ -210,11 +181,8 @@ new();
             Camera.main;
 
 
-        if (map == null ||
-            cam == null)
-        {
+        if (map == null || cam == null)
             return;
-        }
 
 
 
@@ -222,7 +190,6 @@ new();
             cam.ScreenToWorldPoint(
                 Input.mousePosition
             );
-
 
 
         Vector2Int grid =
@@ -236,7 +203,7 @@ new();
 
 
         if (node == null ||
-            !node.IsOccupied)
+           !node.IsOccupied)
         {
             return;
         }
@@ -249,9 +216,7 @@ new();
 
 
         if (startBuilding == null)
-        {
             return;
-        }
 
 
 
@@ -263,6 +228,31 @@ new();
 
 
         EnterSelectTarget();
+    }
+
+
+
+    private void EnterSelectStart()
+    {
+        state =
+            PreviewState.SelectStart;
+
+
+        hasStart = false;
+
+        startBuilding = null;
+
+        previewTargetBuilding = null;
+
+        currentPath = null;
+
+        isPreviewValid = false;
+
+        hasLastPreviewPosition = false;
+
+        CurrentCost.Clear();
+
+        preview.Clear();
     }
 
 
@@ -286,18 +276,16 @@ new();
         UpdatePreview();
 
 
-
         if (Input.GetMouseButtonDown(0))
         {
             TryGenerateOrConnect();
         }
 
 
-
         if (Input.GetMouseButtonDown(1) ||
-            Input.GetKeyDown(KeyCode.Escape))
+           Input.GetKeyDown(KeyCode.Escape))
         {
-            EnterSelectStart();
+            ExitPlacement();
         }
     }
 
@@ -306,10 +294,7 @@ new();
     private void UpdatePreview()
     {
         if (!hasStart)
-        {
             return;
-        }
-
 
 
         GridMapManager map =
@@ -320,12 +305,8 @@ new();
             Camera.main;
 
 
-
-        if (map == null ||
-            cam == null)
-        {
+        if (map == null || cam == null)
             return;
-        }
 
 
 
@@ -333,7 +314,6 @@ new();
             cam.ScreenToWorldPoint(
                 Input.mousePosition
             );
-
 
 
         previewGridPosition =
@@ -347,7 +327,7 @@ new();
 
 
 
-        bool connectionStateChanged =
+        bool changed =
             UpdateConnectionPreviewState(
                 previewGridPosition
             );
@@ -355,9 +335,8 @@ new();
 
 
         if (hasLastPreviewPosition &&
-            lastPreviewGridPosition ==
-            previewGridPosition &&
-            !connectionStateChanged)
+           lastPreviewGridPosition == previewGridPosition &&
+           !changed)
         {
             return;
         }
@@ -369,7 +348,6 @@ new();
 
 
         hasLastPreviewPosition = true;
-
 
 
         RecalculatePreview();
@@ -384,7 +362,6 @@ new();
             previewTargetBuilding;
 
 
-
         previewTargetBuilding = null;
 
 
@@ -396,24 +373,20 @@ new();
 
 
         if (node != null &&
-            node.IsOccupied &&
-            node.Occupant != null &&
-            node.Occupant != startBuilding &&
-            !node.Occupant.ConnectedToHome)
+           node.IsOccupied &&
+           node.Occupant != null &&
+           node.Occupant != startBuilding &&
+           !node.Occupant.ConnectedToHome)
         {
             previewTargetBuilding =
                 node.Occupant;
 
 
-            preview.SetBuildingPreviewVisible(
-                false
-            );
+            preview.SetBuildingPreviewVisible(false);
         }
         else
         {
-            preview.SetBuildingPreviewVisible(
-                true
-            );
+            preview.SetBuildingPreviewVisible(true);
         }
 
 
@@ -464,7 +437,53 @@ new();
             isPreviewValid
         );
 
+
         UpdateCurrentCost();
+    }
+
+
+
+    private void UpdateCurrentCost()
+    {
+        CurrentCost.Clear();
+
+
+        if (currentPath == null)
+            return;
+
+
+        AddCost(
+            buildingData.Costs
+        );
+
+
+        for (int i = 0; i < currentPath.Count; i++)
+        {
+            AddCost(
+                rootBuildingData.Costs
+            );
+        }
+    }
+
+
+
+    private void AddCost(
+        ResourceCost[] costs)
+    {
+        if (costs == null)
+            return;
+
+
+        foreach (ResourceCost cost in costs)
+        {
+            if (!CurrentCost.ContainsKey(cost.type))
+            {
+                CurrentCost[cost.type] = 0;
+            }
+
+
+            CurrentCost[cost.type] += cost.amount;
+        }
     }
 
 
@@ -477,10 +496,8 @@ new();
                 previewTargetBuilding
             );
 
-
             return;
         }
-
 
 
         TryGenerate();
@@ -495,7 +512,7 @@ new();
             startBuilding,
             target))
         {
-            EnterSelectStart();
+            ExitPlacement();
         }
     }
 
@@ -504,10 +521,7 @@ new();
     private void TryGenerate()
     {
         if (!isPreviewValid)
-        {
             return;
-        }
-
 
 
         if (!executor.Generate(
@@ -519,32 +533,26 @@ new();
         }
 
 
-
-        EnterSelectStart();
+        ExitPlacement();
     }
 
 
 
-    private void EnterSelectStart()
+    private void ExitPlacement()
     {
         state =
-            PreviewState.SelectStart;
+            PreviewState.None;
 
 
         hasStart = false;
 
-
         startBuilding = null;
-
 
         previewTargetBuilding = null;
 
-
         currentPath = null;
 
-
         isPreviewValid = false;
-
 
         hasLastPreviewPosition = false;
 
@@ -553,7 +561,14 @@ new();
 
 
         preview.Clear();
+
+
+        if (BuildingDataPanelController.Instance != null)
+        {
+            BuildingDataPanelController.Instance.Hide();
+        }
     }
+
 
 
     private void OnDestroy()

@@ -115,6 +115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barSize: {x: 3, y: 0.3}
   hideDelay: 2
+  alwaysShowWhenNotFullHealth: 0
   bottomOffset: 0.2
 --- !u!61 &-5895424896124703479
 BoxCollider2D:
@@ -152,7 +153,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 1.75}
+    oldSize: {x: 1.3333334, y: 1.1666666}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

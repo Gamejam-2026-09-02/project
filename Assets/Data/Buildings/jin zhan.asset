@@ -15,6 +15,7 @@ MonoBehaviour:
   buildingName: "\u8FD1\u6218"
   description: "\u83CC\u961F\u4E2D\u6700\u52C7\u6B66\u7684\u6218\u58EB\uFF0C\u603B\u662F\u51B2\u950B\u5728\u961F\u4F0D\u524D\u65B9\uFF0C\u5982\u679C\u7ED9\u4ED6\u4EEC\u5957\u4E0A\u76D4\u7532\uFF0C\u6216\u8BB8\u4F1A\u5BF9\u6218\u6597\u8D77\u5230\u5F88\u5927\u5E2E\u52A9"
   prefab: {fileID: 4985825276884644060, guid: 69765905807ca944faafd86e2b256937, type: 3}
+  icon: {fileID: 0}
   AttackDamage: 4
   AttackInterval: 1
   AttackRange: 2
@@ -29,9 +30,3 @@ MonoBehaviour:
   costs:
   - type: 0
     amount: 4
-  - type: 0
-    amount: 0
-  - type: 0
-    amount: 0
-  - type: 0
-    amount: 0

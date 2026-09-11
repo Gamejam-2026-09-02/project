@@ -13,8 +13,10 @@ public class BuildingSelectButton : MonoBehaviour
 
     private Button button;
 
+
     public TMP_Text text;
     public Image image;
+
 
     public void Initialize(
         BuildingData data,
@@ -32,6 +34,7 @@ public class BuildingSelectButton : MonoBehaviour
             Select
         );
 
+
         text.text = buildingData.name;
         image.sprite = buildingData.icon;
     }
@@ -40,16 +43,14 @@ public class BuildingSelectButton : MonoBehaviour
 
     private void Select()
     {
-        controller.SetBuildingData(
-            buildingData
-        );
+        BuildingSelectController.Instance
+            .SelectBuilding(buildingData);
 
 
         Debug.Log(
             $"Ñ¡Ôñ½¨Öþ: {buildingData.name}"
         );
     }
-
 
 
     private void OnDestroy()
